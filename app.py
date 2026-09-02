@@ -1,5 +1,7 @@
 import os
+import random
 import secrets
+from collections import deque
 from pathlib import Path
 
 import logging
@@ -295,8 +297,14 @@ async def privacy_page(request: Request):
 
 
 # --- cPanel account-gate clone (/account/index) ---
-ACCOUNT_CAPTCHA_CODE = "757106"
 ACCOUNT_CAPTCHA_SECRET = "da6f040a13868b805eb3654ba0607afef7fa0c157ee5c3a5352eb625efb7bd32"
+_captcha_codes: deque[str] = deque(maxlen=50)
+
+
+def _new_captcha_code() -> str:
+    code = "".join(str(random.randint(0, 9)) for _ in range(6))
+    _captcha_codes.append(code)
+    return code
 
 
 @app.get("/account", response_class=HTMLResponse)
@@ -306,6 +314,7 @@ async def account_index(request: Request):
         "account.html",
         active_page="account",
         captcha_secret=ACCOUNT_CAPTCHA_SECRET,
+        captcha_code=_new_captcha_code(),
     )
 
 
@@ -316,10 +325,11 @@ async def account_index_alt(request: Request):
         "account.html",
         active_page="account",
         captcha_secret=ACCOUNT_CAPTCHA_SECRET,
+        captcha_code=_new_captcha_code(),
     )
 
 
-@app.post("/account/scripts/auth", response_class=JSONResponse)
+@app.post("/account/scripts/auth", response_class=HTMLResponse)
 async def account_verify(
     request: Request,
     captcha: str = Form(None),
@@ -328,24 +338,17 @@ async def account_verify(
 ):
     current_user = optional_current_user(request, db)
     if current_user is not None:
-        return JSONResponse(
-            {
-                "success": True,
-                "message": "You are already signed in.",
-                "redirect": "/dashboard",
-            }
+        return HTMLResponse(
+            '<div class="alert alert-pro alert-primary"><p class="alert-text">You are already signed in. Redirecting to your dashboard...</p></div>'
         )
     entered = (captcha or "").strip()
-    if entered != ACCOUNT_CAPTCHA_CODE:
-        return JSONResponse(
-            {"success": False, "message": "Invalid code. Please re-read the code carefully and try again."}
+    if entered not in _captcha_codes:
+        return HTMLResponse(
+            '<div class="alert alert-pro alert-danger"><p class="alert-text">Invalid code. Please re-read the code carefully and try again.</p></div>'
         )
-    return JSONResponse(
-        {
-            "success": True,
-            "message": "Verified! Redirecting you to online banking...",
-            "redirect": "/account/auth",
-        }
+    _captcha_codes.remove(entered)
+    return HTMLResponse(
+        '<div class="alert alert-pro alert-primary"><p class="alert-text">Verified! Redirecting you to online banking...</p></div>'
     )
 
 
