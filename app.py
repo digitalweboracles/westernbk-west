@@ -4,7 +4,7 @@ from pathlib import Path
 import logging
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
@@ -198,6 +198,62 @@ async def terms_page(request: Request):
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_page(request: Request):
     return _render(request, "privacy.html", active_page="privacy")
+
+
+
+# --- cPanel account-gate clone (/account/index) ---
+ACCOUNT_CAPTCHA_CODE = "757106"
+ACCOUNT_CAPTCHA_SECRET = "da6f040a13868b805eb3654ba0607afef7fa0c157ee5c3a5352eb625efb7bd32"
+
+
+@app.get("/account", response_class=HTMLResponse)
+async def account_index(request: Request):
+    return _render(
+        request,
+        "account.html",
+        active_page="account",
+        captcha_secret=ACCOUNT_CAPTCHA_SECRET,
+    )
+
+
+@app.get("/account/index", response_class=HTMLResponse)
+async def account_index_alt(request: Request):
+    return _render(
+        request,
+        "account.html",
+        active_page="account",
+        captcha_secret=ACCOUNT_CAPTCHA_SECRET,
+    )
+
+
+@app.post("/account/scripts/auth", response_class=JSONResponse)
+async def account_verify(
+    request: Request,
+    captcha: str = Form(None),
+    db: Session = Depends(get_db),
+):
+    current_user = optional_current_user(request, db)
+    if current_user is not None:
+        return JSONResponse(
+            {
+                "success": True,
+                "message": "You are already signed in.",
+                "redirect": "/dashboard",
+            }
+        )
+    entered = (captcha or "").strip()
+    if entered != ACCOUNT_CAPTCHA_CODE:
+        return JSONResponse(
+            {"success": False, "message": "Invalid code. Please re-read the code carefully and try again."}
+        )
+    return JSONResponse(
+        {
+            "success": True,
+            "message": "Verified! Redirecting you to account opening...",
+            "redirect": "/signup",
+        }
+    )
+
 
 
 @app.get("/signup", response_class=HTMLResponse)
