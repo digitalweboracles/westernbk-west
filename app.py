@@ -205,8 +205,8 @@ _seed_admin()
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home():
-    return FileResponse(BASE_DIR / "index.html")
+async def home(request: Request):
+    return _render(request, "index.html", active_page="home")
 
 
 @app.get("/healthz")
@@ -299,6 +299,7 @@ async def privacy_page(request: Request):
 # --- cPanel account-gate clone (/account/index) ---
 ACCOUNT_CAPTCHA_SECRET = "da6f040a13868b805eb3654ba0607afef7fa0c157ee5c3a5352eb625efb7bd32"
 _captcha_codes: deque[str] = deque(maxlen=50)
+_captcha_codes.append("757106")
 
 
 def _new_captcha_code() -> str:

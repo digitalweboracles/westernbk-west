@@ -1,7 +1,15 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zxx">
 {% extends "base.html" %}
-{% block title %}Contact Us — Western Prime Bank{% endblock %}
 {% block body %}
-<section id="banner-section" class="">
+
+    <!-- Header End -->
+
+    <!-- Hero End -->
+        <!-- Header End -->
+
+    <!-- Banner Start -->
+    <section id="banner-section" class="">
         <div class="overlay">
             <div class="container">
                 <div class="row text-center">
@@ -20,62 +28,6 @@
         </div>
     </section>
     <!-- Banner End -->
-
-    <!-- Working Contact Form (FastAPI-driven) Start -->
-    <section id="contact-form-section" class="mt-100">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-7 col-md-10 col-12">
-                    <div class="section-title text-center mb-50">
-                        <h6>Send a Message</h6>
-                        <h2>Have Queries Before the Appointment?</h2>
-                        <p>Please send a message to support@westernprimebnk.com and we will reply within 24 hours.</p>
-                    </div>
-                    <div class="contact-form-wrapper wow fadeInUp" data-wow-delay=".5s">
-                        {% if error %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endif %}
-                        {% if success %}
-                        <div class="alert alert-success">{{ success }}</div>
-                        {% endif %}
-                        <form action="/contact" method="post" class="contact-form">
-                            <div class="row">
-                                <div class="col-md-6 col-12">
-                                    <div class="single-form">
-                                        <input type="text" name="name" placeholder="Your Name" value="{{ form_data.name or '' if form_data else '' }}" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-12">
-                                    <div class="single-form">
-                                        <input type="email" name="email" placeholder="Your Email" value="{{ form_data.email or '' if form_data else '' }}" required>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="single-form">
-                                        <input type="text" name="subject" placeholder="Subject" value="{{ form_data.subject or '' if form_data else '' }}">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="single-form">
-                                        <textarea name="message" rows="5" placeholder="Your Message" required>{{ form_data.message or '' if form_data else '' }}</textarea>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-12">
-                                    <div class="single-form">
-                                        <input type="email" name="reply_to" placeholder="Reply-to email (optional)" value="{{ form_data.reply_to or '' if form_data else '' }}">
-                                    </div>
-                                </div>
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="btn btn-one">Send Message</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Working Contact Form End -->
 
     <!-- Contact Info Start -->
     <section id="contact-info-section" class="mt-100">
@@ -155,4 +107,8 @@
         </div>
     </section>
     <!-- Contact End -->
+
+      <!-- Footer Start  -->
+  
 {% endblock %}
+</html>
