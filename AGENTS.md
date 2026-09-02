@@ -20,7 +20,7 @@ Static marketing site (original HTML/design) with FastAPI backend powering dynam
 
 ## Stack
 Python FastAPI + SQLAlchemy + Jinja2; auth = JWT session cookie (`session`), PBKDF2 (`security.py`); env `SESSION_SECRET` optional (auto-generated)
-Routes: `/`, `/healthz`, `/about`, `/services`, `/projects`, `/contact`, `/newsletter`, `/signup`, `/login`, `/logout`, `/dashboard`, `/apply`
+Routes: `/`, `/healthz`, `/about`, `/services`, `/projects`, `/blog`, `/contact`, `/newsletter`, `/signup`, `/login`, `/logout`, `/dashboard`, `/apply`
 
 ## Local dev
 `pip install -r requirements.txt`; `DATABASE_URL=sqlite:///./dev.db SESSION_SECRET=test uvicorn app:app --port 8000`
@@ -32,4 +32,5 @@ Routes: `/`, `/healthz`, `/about`, `/services`, `/projects`, `/contact`, `/newsl
 - Login rejects inactive users (`POST /login` returns error page, no session); `get_current_user`/`optional_current_user` both check `is_active` (disabled → 401/None.
 - Added `GET /terms` and `GET /privacy` routes + `templates/terms.html`/`privacy.html`; footer/admin nav links updated; `index.html` links/forms/typos cleaned (incl social links now real URLs).
 - Known quirk: local plain-HTTP curl does not persist `Secure` cookie deletion → logout appears no-op over HTTP; over HTTPS (prod) `Set-Cookie: session=; Max-Age=0` works — verify with browser.
-- Railway env not yet wired: `DATABASE_URL` should be a Service Reference to the Postgres service; `SESSION_SECRET`/`ADMIN_PASSWORD` settable via service variables.`
+- Railway env not yet wired: `DATABASE_URL` should be a Service Reference to the Postgres service; `SESSION_SECRET`/`ADMIN_PASSWORD` settable via service variables.
+- **cPanel parity (2026-09)**: Railway now mirrors WesternPrimeBNK.com (cPanel) page set. Ported bodies of `about.php`, `projects.php`, `service-details.php` (→ `/services`), `contact.php`, `blog.php` into Jinja templates extending `base.html` (same iddrak template/CSS) with assets via `url_for('static',...)`; images fetched from cPanel into `static/images/` (blog/, projects/04-05, service/01-02/service-details.jpg). `/blog` added; `/services` serves service-details body. Contact page retains working FastAPI POST form (+ cPanel info cards/map). Homepage nav/service/project cards rewired from `#` anchors to real routes; Blog item added in `base.html` + `index.html` nav; Backend refs updated in `app.py`
