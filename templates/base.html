@@ -52,6 +52,9 @@
                             </div>
                             <div class="button add-list-button">
                                 {% if current_user %}
+                                {% if current_user.is_admin %}
+                                <a href="/admin" class="btn btn-sm btn-one">Admin</a>
+                                {% endif %}
                                 <a href="/dashboard" class="btn btn-sm btn-one">Dashboard</a>
                                 <a href="/logout" class="btn btn-sm">Logout</a>
                                 {% else %}
@@ -83,9 +86,9 @@
                                 </form>
                             </div>
                             <ul class="social d-flex mt-30">
-                                <li><a href="#" aria-label="Facebook"><i class="fa fa-facebook"></i></a></li>
-                                <li><a href="#" aria-label="Twitter"><i class="fa fa-twitter"></i></a></li>
-                                <li><a href="#" aria-label="LinkedIn"><i class="fa fa-linkedin"></i></a></li>
+                                <li><a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa fa-facebook"></i></a></li>
+                                <li><a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter"><i class="fa fa-twitter"></i></a></li>
+                                <li><a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa fa-linkedin"></i></a></li>
                             </ul>
                         </div>
                     </div>
@@ -115,8 +118,8 @@
                         <div class="footer-cmn f-legal f-links wow fadeInUp" data-wow-delay=".8s">
                             <h5>Legal</h5>
                             <ul>
-                                <li><a href="#">Terms &amp; Conditions</a></li>
-                                <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="/terms">Terms &amp; Conditions</a></li>
+                                <li><a href="/privacy">Privacy Policy</a></li>
                                 <li><a href="/contact">Quick Contact</a></li>
                                 {% if current_user %}
                                 <li><a href="/apply">Apply Online</a></li>

@@ -33,6 +33,7 @@ class User(TimestampMixin, Base):
     phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
     applications: Mapped[list["LoanApplication"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
@@ -66,6 +67,7 @@ class ContactMessage(TimestampMixin, Base):
     subject: Mapped[str | None] = mapped_column(String(200), nullable=True)
     message: Mapped[str] = mapped_column(Text)
     reply_to: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class NewsletterSubscriber(TimestampMixin, Base):
