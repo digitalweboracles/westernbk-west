@@ -320,6 +320,16 @@ async def apply_submit(
     )
 
 
+
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return _render(request, "terms.html", active_page="terms")
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return _render(request, "privacy.html", active_page="privacy")
+
+
 if __name__ == "__main__":
     import uvicorn
 
