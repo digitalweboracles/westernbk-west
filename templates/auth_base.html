@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ auth_title }}{% endblock %}
+{% block body %}
+<style>
+    body:has(.auth-bg) #preloader,
+    body:has(.auth-bg) .header.navbar-area,
+    body:has(.auth-bg) #footer-section {
+        display: none;
+    }
+    body:has(.auth-bg) {
+        background: #fff;
+    }
+</style>
+<div class="auth-bg">
+    <div class="auth-split">
+        <div class="auth-form-side">
+            <div class="brand-logo-auth">
+                <a href="/">
+                    <img src="{{ url_for('static', path='images/logo.png') }}" alt="Western Prime Bank">
+                </a>
+            </div>
+            <div class="auth-card-head">
+                <h3>{{ auth_heading }}</h3>
+                {% if auth_subtitle %}<p>{{ auth_subtitle }}</p>{% endif %}
+            </div>
+            {% if error %}
+            <div class="auth-alert alert-error auth-errorbar">{{ error }}</div>
+            {% endif %}
+            {% if success %}
+            <div class="auth-alert auth-errorbar">{{ success }}</div>
+            {% endif %}
+            <div class="auth-form-wrap">
+                {% block auth_form %}{% endblock %}
+            </div>
+            <div class="auth-footer">
+                {% block auth_footer %}{% endblock %}
+                <p>&copy; 2026 Western Prime Bank. All Rights Reserved.</p>
+            </div>
+        </div>
+        <div class="auth-promo-side">
+            <div class="auth-security-slider" id="authSlider">
+                <div class="auth-slide active">
+                    <div class="auth-slide-icon">
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                            <circle cx="32" cy="32" r="30" stroke="#033d75" stroke-width="2.5" fill="none"/>
+                            <path d="M32 16a10 10 0 0 0-10 10v6h-4v22h28V32h-4v-6a10 10 0 0 0-10-10zm0 6a4 4 0 0 1 4 4v6h-8v-6a4 4 0 0 1 4-4z" fill="#033d75"/>
+                            <circle cx="42" cy="20" r="6" fill="#d13636"/>
+                        </svg>
+                    </div>
+                    <h4>Protect your online banking.</h4>
+                    <p>We have security measures in place to safeguard your money, because we are committed to providing you with a secure banking experience. When we come across any hoaxes or scams that target customers, we will raise them to your attention.</p>
+                </div>
+                <div class="auth-slide">
+                    <div class="auth-slide-icon">
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                            <rect x="10" y="26" width="44" height="32" rx="4" stroke="#033d75" stroke-width="2.5"/>
+                            <path d="M20 26v-8a12 12 0 0 1 24 0v8" stroke="#033d75" stroke-width="2.5" fill="none"/>
+                            <circle cx="32" cy="40" r="5" fill="#033d75"/>
+                            <path d="M32 42v6" stroke="#d13636" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h4>We&rsquo;ll never ask for your secrets.</h4>
+                    <p>We'll never send an email containing a link to Western Prime Bank. We'll never ask for your passwords or Secret Code.</p>
+                </div>
+                <div class="auth-slide">
+                    <div class="auth-slide-icon">
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                            <path d="M6 34l26-22 26 22" stroke="#033d75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 30v22h36V30" stroke="#033d75" stroke-width="2.5" stroke-linejoin="round"/>
+                            <path d="M26 52V38h12v14" stroke="#033d75" stroke-width="2.5" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h4>Always open a new browser window.</h4>
+                    <p>When accessing your online banking, always open a new browser window and type westernprimebnk.com directly.</p>
+                </div>
+                <div class="auth-dots">
+                    <button type="button" class="active" data-slide="0" aria-label="Slide 1"></button>
+                    <button type="button" data-slide="1" aria-label="Slide 2"></button>
+                    <button type="button" data-slide="2" aria-label="Slide 3"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    var slides = document.querySelectorAll('#authSlider .auth-slide');
+    var dots = document.querySelectorAll('#authSlider .auth-dots button');
+    var idx = 0;
+    function show(i) {
+        idx = (i + slides.length) % slides.length;
+        Array.prototype.forEach.call(slides, function (s, j) { s.classList.toggle('active', j === idx); }));
+        Array.prototype.forEach.call(dots, function (d, j) { d.classList.toggle('active', j === idx); }));
+    }
+    Array.prototype.forEach.call(dots, function (d) {
+        d.addEventListener('click', function () { show(parseInt(d.getAttribute('data-slide'), 10)); });
+    });
+    setInterval(function () { show(idx + 1); }, 5000);
+})();
+</script>
+{% endblock %}

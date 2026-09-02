@@ -1,54 +1,27 @@
-{% extends "base.html" %}
-{% block title %}Sign Up — Western Prime Bank{% endblock %}
-{% block body %}
-<section class="page-banner-area section-padding" style="padding-top:140px;>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-7 col-md-10 col-12">
-                <div class="section-title text-center">
-                    <h2 class="wow fadeInUp">Open an Account</h2>
-                    <p class="wow fadeInUp" data-wow-delay=".3s">Create your Western Prime Bank account to apply for loans, track applications, and manage your banking.</p>
-                </div>
-                <div class="contact-form-wrapper wow fadeInUp" data-wow-delay=".5s">
-                    {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endif %}
-                    <form action="/signup" method="post" class="contact-form">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="single-form">
-                                    <input type="text" name="full_name" placeholder="Full Name" value="{{ full_name or '' }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <div class="single-form">
-                                    <input type="email" name="email" placeholder="Email Address" value="{{ email or '' }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <div class="single-form">
-                                    <input type="tel" name="phone" placeholder="Phone (optional)" value="{{ phone or '' }}">
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <div class="single-form">
-                                    <input type="password" name="password" placeholder="Password (min 8 chars)" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <div class="single-form">
-                                    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-                                </div>
-                            </div>
-                            <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-one">Create Account</button>
-                            </div>
-                        </div>
-                    </form>
-                    <p class="text-center mt-20">Already have an account? <a href="/login">Login here</a></p>
-                </div>
-            </div>
-        </div>
+{% extends "auth_base.html" %}
+{% set auth_title = "Open Account — Western Prime Bank" %}
+{% set auth_heading = "Welcome" %}
+{% set auth_subtitle = "Create your Western Prime Bank account to apply for loans and track your applications." %}
+{% block auth_form %}
+<form action="/signup" method="post" class="auth-form">
+    <div class="form-group-auth">
+        <input type="text" name="full_name" class="form-control-auth form-control-xl" placeholder="Full Name" value="{{ full_name or '' }}" required>
     </div>
-</section>
+    <div class="form-group-auth">
+        <input type="email" name="email" class="form-control-auth form-control-xl" placeholder="Email Address" value="{{ email or '' }}" required>
+    </div>
+    <div class="form-group-auth">
+        <input type="tel" name="phone" class="form-control-auth form-control-xl" placeholder="Phone (optional)" value="{{ phone or '' }}">
+    </div>
+    <div class="form-group-auth">
+        <input type="password" name="password" class="form-control-auth form-control-xl" placeholder="Password (min 8 chars)" required>
+    </div>
+    <div class="form-group-auth">
+        <input type="password" name="confirm_password" class="form-control-auth form-control-xl" placeholder="Confirm Password" required>
+    </div>
+    <div class="form-group-auth">
+        <button type="submit" class="btn-auth">Create Account</button>
+    </div>
+</form>
 {% endblock %}
+{% block auth_footer %}Already have an account? <a href="/login">Login here</a>{% endblock %}
