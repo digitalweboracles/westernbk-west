@@ -4,23 +4,28 @@
 {% set auth_subtitle = "Create your Western Prime Bank account to apply for loans and track your applications." %}
 {% block auth_form %}
 <form action="/signup" method="post" class="auth-form">
-    <div class="form-group-auth">
-        <input type="text" name="full_name" class="form-control-auth form-control-xl" placeholder="Full Name" value="{{ full_name or '' }}" required>
+    <div class="form-group">
+        <label class="form-label" for="full_name">Full Name</label>
+        <input type="text" name="full_name" id="full_name" class="form-control form-control-xl" placeholder="Full Name" value="{{ full_name or '' }}" required>
     </div>
-    <div class="form-group-auth">
-        <input type="email" name="email" class="form-control-auth form-control-xl" placeholder="Email Address" value="{{ email or '' }}" required>
+    <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input type="email" name="email" id="email" class="form-control form-control-xl" placeholder="Email Address" value="{{ email or '' }}" required>
     </div>
-    <div class="form-group-auth">
-        <input type="tel" name="phone" class="form-control-auth form-control-xl" placeholder="Phone (optional)" value="{{ phone or '' }}">
+    <div class="form-group">
+        <label class="form-label" for="phone">Phone (optional)</label>
+        <input type="tel" name="phone" id="phone" class="form-control form-control-xl" placeholder="Phone (optional)" value="{{ phone or '' }}">
     </div>
-    <div class="form-group-auth">
-        <input type="password" name="password" class="form-control-auth form-control-xl" placeholder="Password (min 8 chars)" required>
+    <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" name="password" id="password" class="form-control form-control-xl" placeholder="Password (min 8 chars)" required>
     </div>
-    <div class="form-group-auth">
-        <input type="password" name="confirm_password" class="form-control-auth form-control-xl" placeholder="Confirm Password" required>
+    <div class="form-group">
+        <label class="form-label" for="confirm_password">Confirm Password</label>
+        <input type="password" name="confirm_password" id="confirm_password" class="form-control form-control-xl" placeholder="Confirm Password" required>
     </div>
-    <div class="form-group-auth">
-        <button type="submit" class="btn-auth">Create Account</button>
+    <div class="form-group">
+        <button type="submit" class="btn btn-lg btn-primary btn-block">Create Account</button>
     </div>
 </form>
 {% endblock %}

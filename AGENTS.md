@@ -14,6 +14,14 @@ Static marketing site (original HTML/design) with FastAPI backend powering dynam
 - `database.py` reads `DATABASE_URL` (Postgres-ready), falls back to `sqlite:///./dev.db` for dev
 - Postgres service is deployed and Online but as of the last check the web service runs SQLite (`dev.db` inside ephemeral container disk) — `DATABASE_URL` **not yet** wired in the web service variables. User must add a Service Reference variable `DATABASE_URL` from the Postgres service (dashboard → service Variables) and redeploy to go fully Postgres.
 
+## Required service variables (Railway dashboard → service Variables)
+Set these on the `westernbk-west` service (web service)::
+- `DATABASE_URL` — **Service Reference** to the Postgres service (id `75c38127-2f9c-45f3-b6d6-424e8c2e6ea8`) not a literal string; redeploy after adding to go fully Postgres
+- `SESSION_SECRET` — stable random hex (e.g. `openssl rand -hex 32`); without it `security.py` auto-generates a new secret per deploy → all existing login cookies invalidate on every redeploy
+- `ADMIN_PASSWORD` — seeded admin password (`_seed_admin` uses it); if unset, default `AdminPass123!` applies only to fresh DB (existing user row keeps old hash)
+- `ADMIN_EMAIL` — optional; default `admin@westernprimebank.com`
+- `COOKIE_SECURE` — default `"1"` (secure cookies; keep `1` on HTTPS prod
+
 ## Static assets
 - `index.html` + all asset dirs (css/fonts/images/js) live under `static/`; mounted at `/static` (mount name `"static"` so `url_for('static', path=...)` works)
 - Do NOT mount `/static` to the repo root — it exposed runtime-created `dev.db` publicly (fixed in commit `1b37408`)
