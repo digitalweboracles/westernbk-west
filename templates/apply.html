@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Apply for a Loan — Western Prime Bank{% endblock %}
+{% block body %}
+<section class="section-padding" style="padding-top:160px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-12">
+                <div class="section-title text-center">
+                    <h2 class="wow fadeInUp">Apply for a Loan</h2>
+                    <p class="wow fadeInUp" data-wow-delay=".3s">Choose your loan product and submit your application.</p>
+                </div>
+                <div class="contact-form-wrapper wow fadeInUp" data-wow-delay=".5s">
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    {% if success %}
+                    <div class="alert alert-success">{{ success }}</div>
+                    {% endif %}
+                    <form action="/apply" method="post" class="contact-form">
+                        <div class="row">
+                            <div class="col-md-6 col-12">
+                                <div class="single-form">
+                                    <select name="loan_type" class="form-select" required>
+                                        <option value="">Select Loan Type...</option>
+                                        {% for lt in loan_types %}
+                                        <option value="{{ lt }}" {{ 'selected' if form_data and form_data.loan_type == lt }}>{{ lt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="single-form">
+                                    <input type="number" name="amount" step="0.01" min="1" placeholder="Loan Amount" value="{{ form_data.amount or '' if form_data else '' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="single-form">
+                                    <input type="number" name="term_months" min="1" max="600" placeholder="Term (months, optional)" value="{{ form_data.term_months or '' if form_data else '' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="single-form">
+                                    <input type="text" name="currency" value="{{ form_data.currency or 'USD' if form_data else 'USD' }}" placeholder="Currency (e.g.USD)">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="single-form">
+                                    <textarea name="purpose" rows="4" placeholder="Loan purpose (optional)">{{ (form_data.purpose or '') if form_data else '' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-one">Submit Application</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

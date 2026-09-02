@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}Western Prime Bank{% endblock %}</title>
+    <meta name="description" content="{{ meta_description|default('Western Prime Bank - Your Banking and Financial Solution') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', path='images/favicon.png') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&amp;family=Roboto:wght@300;400;500&amp;display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/LineIcons.2.0.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='fonts/flaticon.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/animate.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tiny-slider.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/glightbox.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/typography.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+
+<body>
+    <div id="preloader">
+        <div class="iddrak-load"></div>
+    </div>
+
+    <header class="header navbar-area">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <div class="nav-inner">
+                        <nav class="navbar navbar-expand-lg">
+                            <a class="navbar-brand style3" href="/">
+                                <img src="{{ url_for('static', path='images/logo.png') }}" alt="Logo">
+                            </a>
+
+                            <button class="navbar-toggler mobile-menu-btn" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="toggler-icon"></span>
+                                <span class="toggler-icon"></span>
+                                <span class="toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
+                                <ul id="nav" class="navbar-nav ms-auto">
+                                    <li class="nav-item"><a href="/" class="{{ 'active' if active_page == 'home' else '' }}" aria-label="Toggle navigation">Home</a></li>
+                                    <li class="nav-item"><a href="/services" class="{{ 'active' if active_page == 'services' else '' }}" aria-label="Toggle navigation">Services</a></li>
+                                    <li class="nav-item"><a href="/projects" class="{{ 'active' if active_page == 'projects' else '' }}" aria-label="Toggle navigation">Projects</a></li>
+                                    <li class="nav-item"><a href="/about" class="{{ 'active' if active_page == 'about' else '' }}" aria-label="Toggle navigation">About Us</a></li>
+                                    <li class="nav-item"><a href="/contact" class="{{ 'active' if active_page == 'contact' else '' }}" aria-label="Toggle navigation">Contact</a></li>
+                                </ul>
+                            </div>
+                            <div class="button add-list-button">
+                                {% if current_user %}
+                                <a href="/dashboard" class="btn btn-sm btn-one">Dashboard</a>
+                                <a href="/logout" class="btn btn-sm">Logout</a>
+                                {% else %}
+                                <a href="/signup" class="btn">Signup</a>
+                                {% endif %}
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {% block body %}{% endblock %}
+
+    <footer id="footer-section" class="mt-115">
+        <div class="footer-top">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-12 col-sm-6">
+                        <div class="footer-cmn f-activity wow fadeInUp" data-wow-delay=".2s">
+                            <h6>GET IN TOUCH</h6>
+                            <h5>Subscribe Our Newsletter</h5>
+                            <p>Making the world a better place through constructing elegant hierarchies. Innovations enabled by the Western Prime Bank results in products that assist workers.</p>
+                            <div class="subscribe mt-30">
+                                <form action="/newsletter" method="post">
+                                    <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
+                                    <button type="submit" class="btn btn-primary"><i class="fa fa-send"></i></button>
+                                </form>
+                            </div>
+                            <ul class="social d-flex mt-30">
+                                <li><a href="#" aria-label="Facebook"><i class="fa fa-facebook"></i></a></li>
+                                <li><a href="#" aria-label="Twitter"><i class="fa fa-twitter"></i></a></li>
+                                <li><a href="#" aria-label="LinkedIn"><i class="fa fa-linkedin"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12 col-sm-6">
+                        <div class="footer-cmn f-address wow fadeInUp" data-wow-delay=".4s">
+                            <h6>Location</h6>
+                            <h5>Head Office</h5>
+                            <p>301 East Water Street, Charlottesville, VA 22904 Virginia.</p>
+                            <ul class="mt-20">
+                                <li><a href="mailto:support@westernprimebnk.com"><i class="flaticon-mail"></i> support@westernprimebnk.com</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-12 col-sm-6">
+                        <div class="footer-cmn f-solutions f-links wow fadeInUp" data-wow-delay=".6s">
+                            <h5>Services</h5>
+                            <ul>
+                                <li><a href="/services">Business Loan</a></li>
+                                <li><a href="/services">Personal Loan</a></li>
+                                <li><a href="/services">Home Loan</a></li>
+                                <li><a href="/services">Car Loan</a></li>
+                                <li><a href="/services">Land Loan</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-12 col-sm-6">
+                        <div class="footer-cmn f-legal f-links wow fadeInUp" data-wow-delay=".8s">
+                            <h5>Legal</h5>
+                            <ul>
+                                <li><a href="#">Terms &amp; Conditions</a></li>
+                                <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="/contact">Quick Contact</a></li>
+                                {% if current_user %}
+                                <li><a href="/apply">Apply Online</a></li>
+                                {% else %}
+                                <li><a href="/signup">Apply Online</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright text-center mt-50">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <p class="copyright-text mb-0">All Rights Reserved 2026 <a href="/" rel="nofollow">Western Prime Bank</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="scroll-top"><i class="lni lni-chevron-up"></i></a>
+
+    <script src="{{ url_for('static', path='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/wow.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/tiny-slider.js') }}"></script>
+    <script src="{{ url_for('static', path='js/glightbox.min.js') }}"></script>
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

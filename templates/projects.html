@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Projects — Western Prime Bank{% endblock %}
+{% block body %}
+<section class="page-banner-area section-padding" style="padding-top:160px;">
+    <div class="container">
+        <div class="section-title text-center">
+            <h2 class="wow fadeInUp">Our Projects</h2>
+            <p class="wow fadeInUp" data-wow-delay=".3s">Community and economic development initiatives funded by Western Prime Bank.</p>
+        </div>
+    </div>
+</section>
+<section class="project-area section-padding">
+    <div class="container">
+        <div class="row">
+            {% for p in projects %}
+            <div class="col-lg-4 col-md-6 col-12">
+                <div class="single-project wow fadeInUp" data-wow-delay=".{{ loop.index }}s">
+                    <div class="project-img">
+                        <img src="{{ url_for('static', path=p.image) }}" alt="{{ p.title }}" class="w-100">
+                    </div>
+                    <div class="project-content">
+                        <h4>{{ p.title }}</h4>
+                        <p>{{ p.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
