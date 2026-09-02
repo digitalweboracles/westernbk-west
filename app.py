@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 
 import logging
@@ -15,14 +16,26 @@ from sqlalchemy.orm import Session, joinedload
 from database import Base, SessionLocal, engine, get_db
 from migrate import ensure_columns
 from models import (
+    ACCOUNT_STATUSES,
+    ACCOUNT_TYPES,
     LOAN_STATUSES,
     LOAN_TYPES,
+    TRANSACTION_TYPES,
+    BankAccount,
     ContactMessage,
     LoanApplication,
     NewsletterSubscriber,
+    Transaction,
     User,
 )
-from schemas import ContactIn, LoanApplicationIn, NewsletterIn, SignupIn
+from schemas import (
+    BankLoginIn,
+    ContactIn,
+    LoanApplicationIn,
+    NewsletterIn,
+    SignupIn,
+    TransferIn,
+)
 from security import (
     create_session_token,
     get_current_user,
@@ -80,6 +93,86 @@ def get_current_admin(request: Request, user: User = Depends(get_current_user)) 
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
+
+
+def _gen_account_number(db: Session) -> str:
+    """Generate a unique 10-digit account number."""
+    while True:
+        number = "".join(str(secrets.randbelow(10)) for _ in range(10))
+        if db.scalar(select(BankAccount).where(BankAccount.account_number == number)) is None:
+            return number
+
+
+def _account_from_number(db: Session, number: str) -> BankAccount | None:
+    return db.scalar(select(BankAccount).where(BankAccount.account_number == number.strip()))
+
+
+def _credit(db: Session, account: BankAccount, amount: float, currency: str, type_: str, reference: str | None = None):
+    """Record an incoming transaction against an account."""
+    exact = account.balance or 0.0
+    account.balance = round(exact + amount, 2)
+    db.add(
+        Transaction(
+            user_id=account.user_id,
+            to_account_id=account.id,
+            from_account_id=None,
+            type=type_,
+            amount=round(amount, 2),
+            fee=0.0,
+            currency=currency.upper(),
+            reference=reference,
+        )
+    )
+
+
+def _debit(db: Session, account: BankAccount, amount: float, currency: str, type_: str, reference: str | None = None, fee: float = 0.0):
+    """Record an outgoing transaction; caller must already hold the lock."""
+    total = round(amount, 2) + round(fee, 2)
+    exact = account.balance or 0.0
+    account.balance = round(exact - total, 2)
+    db.add(
+        Transaction(
+            user_id=account.user_id,
+            from_account_id=account.id,
+            to_account_id=None,
+            type=type_,
+            amount=round(amount, 2),
+            fee=round(fee, 2),
+            currency=currency.upper(),
+            reference=reference,
+        )
+    )
+
+
+def _bank_login_cookie(response: RedirectResponse, account: BankAccount):
+    response.set_cookie(
+        "bank_session",
+        create_session_token(account.user),
+        httponly=True,
+        samesite="lax",
+        secure=os.environ.get("COOKIE_SECURE", "1") == "1",
+    )
+    response.set_cookie(
+        "bank_account",
+        account.account_number,
+        httponly=True,
+        samesite="lax",
+        secure=os.environ.get("COOKIE_SECURE", "1") == "1",
+    )
+
+
+def get_current_bank_account(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> BankAccount:
+    number = request.cookies.get("bank_account")
+    if not number:
+        raise HTTPException(status_code=401, detail="Select an account")
+    account = _account_from_number(db, number)
+    if account is None or account.user_id != user.id or account.status != "Active":
+        raise HTTPException(status_code=401, detail="Account unavailable")
+    return account
 
 
 def _seed_admin():
@@ -230,6 +323,7 @@ async def account_index_alt(request: Request):
 async def account_verify(
     request: Request,
     captcha: str = Form(None),
+    captcha_secret: str = Form(None),
     db: Session = Depends(get_db),
 ):
     current_user = optional_current_user(request, db)
@@ -249,10 +343,106 @@ async def account_verify(
     return JSONResponse(
         {
             "success": True,
-            "message": "Verified! Redirecting you to account opening...",
-            "redirect": "/signup",
+            "message": "Verified! Redirecting you to online banking...",
+            "redirect": "/account/auth",
         }
     )
+
+
+@app.get("/account/auth", response_class=HTMLResponse)
+async def account_auth_page(request: Request):
+    return _render(
+        request,
+        "account_auth.html",
+        active_page="account",
+    )
+
+
+@app.get("/account/auth/", response_class=HTMLResponse)
+async def account_auth_page_slash(request: Request):
+    return await account_auth_page(request)
+
+
+@app.post("/account/auth", response_class=HTMLResponse)
+async def account_auth_login(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    form = await request.form()
+    ident = str(form.get("id", ""))
+    password = str(form.get("pass", ""))
+    account = _account_from_number(db, ident)
+    if account is None or not verify_password(password, account.user.password_hash) or not account.user.is_active:
+        return _render(
+            request,
+            "account_auth.html",
+            active_page="account",
+            error="Invalid account number or password. Please try again.",
+        )
+    if account.status != "Active":
+        return _render(
+            request,
+            "account_auth.html",
+            active_page="account",
+            error="This account is not active. Please contact support.",
+        )
+    response = RedirectResponse(url="/banking", status_code=303)
+    response.set_cookie(
+        "session",
+        create_session_token(account.user),
+        httponly=True,
+        samesite="lax",
+        secure=os.environ.get("COOKIE_SECURE", "1") == "1",
+    )
+    _bank_login_cookie(response, account)
+    return response
+
+
+@app.get("/account/admin", response_class=HTMLResponse)
+async def account_admin_page(request: Request):
+    return _render(
+        request,
+        "account_admin.html",
+        active_page="account",
+    )
+
+
+@app.get("/account/admin/", response_class=HTMLResponse)
+async def account_admin_page_slash(request: Request):
+    return await account_admin_page(request)
+
+
+@app.post("/account/admin", response_class=HTMLResponse)
+async def account_admin_login(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = db.scalar(select(User).where(User.email == email.strip().lower()))
+    if user is None or not verify_password(password, user.password_hash) or not user.is_active:
+        return _render(
+            request,
+            "account_admin.html",
+            active_page="account",
+            error="Invalid email or password.",
+        )
+    if not user.is_admin:
+        return _render(
+            request,
+            "account_admin.html",
+            active_page="account",
+            error="You do not have administrator access.",
+        )
+    response = RedirectResponse(url="/admin", status_code=303)
+    response.set_cookie(
+        "session",
+        create_session_token(user),
+        httponly=True,
+        samesite="lax",
+        secure=os.environ.get("COOKIE_SECURE", "1") == "1",
+    )
+    return response
 
 
 
@@ -295,6 +485,16 @@ async def signup(
         password_hash=hash_password(data.password),
     )
     db.add(user)
+    db.flush()
+    account = BankAccount(
+        user_id=user.id,
+        account_number=_gen_account_number(db),
+        account_type="Checking",
+        currency="USD",
+        balance=0.0,
+        status="Active",
+    )
+    db.add(account)
     db.commit()
     db.refresh(user)
     response = RedirectResponse(url="/dashboard", status_code=303)
@@ -305,6 +505,7 @@ async def signup(
         samesite="lax",
         secure=os.environ.get("COOKIE_SECURE", "1") == "1",
     )
+    _bank_login_cookie(response, account)
     return response
 
 
@@ -348,6 +549,8 @@ async def logout():
     response = RedirectResponse(url="/", status_code=303)
     secure = os.environ.get("COOKIE_SECURE", "1") == "1"
     response.delete_cookie("session", httponly=True, samesite="lax", secure=secure)
+    response.delete_cookie("bank_session", httponly=True, samesite="lax", secure=secure)
+    response.delete_cookie("bank_account", httponly=True, samesite="lax", secure=secure)
     return response
 
 
@@ -440,6 +643,315 @@ async def apply_submit(
     )
 
 
+# --- Banking panel ---
+@app.get("/banking", response_class=HTMLResponse)
+async def banking_dashboard(
+    request: Request,
+    user: User = Depends(get_current_user),
+    account: BankAccount = Depends(get_current_bank_account),
+    db: Session = Depends(get_db),
+):
+    accounts = db.scalars(
+        select(BankAccount)
+            .where(BankAccount.user_id == user.id)
+            .order_by(BankAccount.created_at.desc())
+    ).all()
+    incoming = db.scalars(
+        select(Transaction)
+            .where(Transaction.to_account_id == account.id)
+            .order_by(Transaction.created_at.desc())
+            .limit(6)
+    ).all()
+    outgoing = db.scalars(
+        select(Transaction)
+            .where(Transaction.from_account_id == account.id)
+            .order_by(Transaction.created_at.desc())
+            .limit(6)
+    ).all()
+    return _render(
+        request,
+        "banking/dashboard.html",
+        active_page="banking",
+        bank_account=account,
+        all_accounts=accounts,
+        incoming=incoming,
+        outgoing=outgoing,
+        account_types=ACCOUNT_TYPES,
+        db=db,
+    )
+
+
+@app.get("/banking/accounts", response_class=HTMLResponse)
+async def banking_accounts(
+    request: Request,
+    user: User = Depends(get_current_user),
+    account: BankAccount = Depends(get_current_bank_account),
+    db: Session = Depends(get_db),
+):
+    accounts = db.scalars(
+        select(BankAccount)
+            .where(BankAccount.user_id == user.id)
+            .order_by(BankAccount.created_at.desc())
+    ).all()
+    return _render(
+        request,
+        "banking/accounts.html",
+        active_page="banking",
+        bank_account=account,
+        all_accounts=accounts,
+        account_types=ACCOUNT_TYPES,
+        db=db,
+    )
+
+
+@app.post("/banking/accounts", response_class=HTMLResponse)
+async def banking_account_create(
+    request: Request,
+    account_type: str = Form(...),
+    currency: str = Form("USD"),
+    initial_deposit: float = Form(0.0),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    form_data = {"account_type": account_type, "currency": currency, "initial_deposit": initial_deposit}
+    if account_type not in ACCOUNT_TYPES:
+        return _render(
+            request,
+            "banking/accounts.html",
+            active_page="banking",
+            all_accounts=db.scalars(
+                select(BankAccount).where(BankAccount.user_id == user.id).order_by(BankAccount.created_at.desc())
+            ).all(),
+            account_types=ACCOUNT_TYPES,
+            error="Please choose a valid account type.",
+            form_data=form_data,
+        )
+    currency_norm = currency.upper() or "USD"
+    initial = round(initial_deposit or 0.0, 2)
+    if initial < 0:
+        return _render(
+            request,
+            "banking/accounts.html",
+            active_page="banking",
+            all_accounts=db.scalars(
+                select(BankAccount).where(BankAccount.user_id == user.id).order_by(BankAccount.created_at.desc())
+            ).all(),
+            account_types=ACCOUNT_TYPES,
+            error="Initial deposit cannot be negative.",
+            form_data=form_data,
+        )
+    account = BankAccount(
+        user_id=user.id,
+        account_number=_gen_account_number(db),
+        account_type=account_type,
+        currency=currency_norm,
+        balance=0.0,
+        status="Active",
+    )
+    db.add(account)
+    if initial > 0:
+        _credit(db, account, initial, currency_norm, "Deposit", "Initial deposit")
+    db.commit()
+    return RedirectResponse(url="/banking/accounts?created=1", status_code=303)
+
+
+@app.post("/banking/switch", response_class=HTMLResponse)
+async def banking_switch_account(
+    request: Request,
+    account_id: int = Form(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    account = db.get(BankAccount, account_id)
+    if account is None or account.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Account not found")
+    response = RedirectResponse(url="/banking", status_code=303)
+    response.set_cookie(
+        "bank_account",
+        account.account_number,
+        httponly=True,
+        samesite="lax",
+        secure=os.environ.get("COOKIE_SECURE", "1") == "1",
+    )
+    account2 = db.scalar(
+        select(BankAccount).where(BankAccount.account_number == account.account_number)
+    )
+    response.set_cookie(
+        "bank_session",
+        create_session_token(account2.user),
+        httponly=True,
+        samesite="lax",
+        secure=os.environ.get("COOKIE_SECURE", "1") == "1",
+    )
+    return response
+
+
+@app.get("/banking/transfer", response_class=HTMLResponse)
+async def banking_transfer_page(
+    request: Request,
+    account: BankAccount = Depends(get_current_bank_account),
+    db: Session = Depends(get_db),
+):
+    return _render(
+        request,
+        "banking/transfer.html",
+        active_page="banking",
+        bank_account=account,
+    )
+
+
+@app.post("/banking/transfer", response_class=HTMLResponse)
+async def banking_transfer_submit(
+    request: Request,
+    to_account_number: str = Form(...),
+    amount: float = Form(...),
+    currency: str = Form("USD"),
+    reference: str = Form(""),
+    account: BankAccount = Depends(get_current_bank_account),
+    db: Session = Depends(get_db),
+):
+    form_data = {"to_account_number": to_account_number, "amount": amount, "currency": currency, "reference": reference}
+    try:
+        data = TransferIn(
+            to_account_number=to_account_number, amount=amount, currency=currency, reference=reference or None,
+        )
+    except ValidationError:
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="Please enter a valid account number, amount greater than zero, and a valid currency code.",
+            form_data=form_data,
+        )
+    if data.to_account_number.strip() == account.account_number:
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="You cannot transfer to your own account.",
+            form_data=form_data,
+        )
+    currency_norm = data.currency.upper()
+    if currency_norm != account.currency:
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="Currency must match your account currency (%s)." % account.currency,
+            form_data=form_data,
+        )
+    to_account = _account_from_number(db, data.to_account_number)
+    if to_account is None:
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="Destination account number not found. Please verify the number and try again.",
+            form_data=form_data,
+        )
+    if to_account.status != "Active":
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="Destination account is not active.",
+            form_data=form_data,
+        )
+    if to_account.currency != account.currency:
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="Destination account currency (%s) does not match yours (%s)." % (to_account.currency, account.currency),
+            form_data=form_data,
+        )
+    if round(amount, 2) > (account.balance or 0.0):
+        return _render(
+            request,
+            "banking/transfer.html",
+            active_page="banking",
+            bank_account=account,
+            error="Insufficient funds. Your available balance is %s %s." % (account.currency, "{:,.2f}".format(account.balance or 0.0)),
+            form_data=form_data,
+        )
+    _debit(db, account, data.amount, currency_norm, "Transfer", reference=f"Transfer to {to_account.account_number}")
+    _credit(db, to_account, data.amount, currency_norm, "Transfer", reference=f"Transfer from {account.account_number}")
+    db.commit()
+    return _render(
+        request,
+        "banking/transfer.html",
+        active_page="banking",
+        bank_account=account,
+        success="Transfer successful. %s %s sent to account %s." % (currency_norm, "{:,.2f}".format(data.amount), to_account.account_number),
+        form_data=None,
+    )
+
+
+@app.get("/banking/transactions", response_class=HTMLResponse)
+async def banking_transactions(
+    request: Request,
+    user: User = Depends(get_current_user),
+    account: BankAccount = Depends(get_current_bank_account),
+    db: Session = Depends(get_db),
+):
+    rows = db.scalars(
+        select(Transaction)
+            .where(
+                (Transaction.from_account_id == account.id) | (Transaction.to_account_id == account.id)
+            )
+            .order_by(Transaction.created_at.desc())
+            .limit(100)
+    ).all()
+    return _render(
+        request,
+        "banking/transactions.html",
+        active_page="banking",
+        bank_account=account,
+        rows=rows,
+        db=db,
+    )
+
+
+@app.get("/banking/statements", response_class=HTMLResponse)
+async def banking_statements(
+    request: Request,
+    user: User = Depends(get_current_user),
+    account: BankAccount = Depends(get_current_bank_account),
+    db: Session = Depends(get_db),
+):
+    rows = db.scalars(
+        select(Transaction)
+            .where(
+                (Transaction.from_account_id == account.id) | (Transaction.to_account_id == account.id)
+            )
+            .order_by(Transaction.created_at.desc())
+            .limit(500)
+    ).all()
+    return _render(
+        request,
+        "banking/statements.html",
+        active_page="banking",
+        bank_account=account,
+        rows=rows,
+    )
+
+
+@app.get("/banking/logout", response_class=HTMLResponse)
+async def banking_logout():
+    response = RedirectResponse(url="/", status_code=303)
+    secure = os.environ.get("COOKIE_SECURE", "1") == "1"
+    response.delete_cookie("session", httponly=True, samesite="lax", secure=secure)
+    response.delete_cookie("bank_session", httponly=True, samesite="lax", secure=secure)
+    response.delete_cookie("bank_account", httponly=True, samesite="lax", secure=secure)
+    return response
+
+
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(
     request: Request,
@@ -456,6 +968,10 @@ async def admin_dashboard(
         select(func.count()).select_from(ContactMessage).where(ContactMessage.is_read == False)
     )
     total_subscribers = db.scalar(select(func.count()).select_from(NewsletterSubscriber))
+    total_accounts = db.scalar(select(func.count()).select_from(BankAccount))
+    total_transfers = db.scalar(
+        select(func.count()).select_from(Transaction).where(Transaction.type == "Transfer")
+    )
     recent_applications = db.scalars(
         select(LoanApplication).order_by(LoanApplication.created_at.desc()).limit(10)
     ).all()
@@ -470,6 +986,8 @@ async def admin_dashboard(
         total_messages=total_messages or 0,
         unread_messages=unread_messages or 0,
         total_subscribers=total_subscribers or 0,
+        total_accounts=total_accounts or 0,
+        total_transfers=total_transfers or 0,
         recent_applications=recent_applications,
         db=db,
     )
@@ -630,6 +1148,88 @@ async def admin_subscribers(
         db=db,
     )
 
+
+@app.get("/admin/accounts", response_class=HTMLResponse)
+async def admin_accounts(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    accounts = db.scalars(
+        select(BankAccount)
+            .options(joinedload(BankAccount.user))
+            .order_by(BankAccount.created_at.desc())
+    ).all()
+    return _render(
+        request,
+        "admin/accounts.html",
+        active_page="admin",
+        admin_page="accounts",
+        accounts=accounts,
+        statuses=ACCOUNT_STATUSES,
+        db=db,
+    )
+
+
+@app.post("/admin/accounts/{account_id}/status", response_class=HTMLResponse)
+async def admin_account_status(
+    account_id: int,
+    status: str = Form(...),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    if status not in ACCOUNT_STATUSES:
+
+        raise HTTPException(status_code=422, detail="Invalid status")
+    account = db.get(BankAccount, account_id)
+    if account is None:
+        raise HTTPException(status_code=404, detail="Account not found")
+    account.status = status
+    db.commit()
+    return RedirectResponse(url="/admin/accounts", status_code=303)
+
+
+@app.post("/admin/accounts/{account_id}/credit", response_class=HTMLResponse)
+async def admin_account_credit(
+    account_id: int,
+    amount: float = Form(...),
+    reference: str = Form(""),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    account = db.get(BankAccount, account_id)
+    if account is None:
+        raise HTTPException(status_code=404, detail="Account not found")
+    if amount <= 0:
+        raise HTTPException(status_code=422, detail="Amount must be positive")
+    _credit(db, account, amount, account.currency, "Deposit", reference.strip() or "Admin credit")
+    db.commit()
+    return RedirectResponse(url="/admin/accounts", status_code=303)
+
+
+@app.get("/admin/transactions", response_class=HTMLResponse)
+async def admin_transactions(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    rows = db.scalars(
+        select(Transaction)
+            .options(joinedload(Transaction.from_account).joinedload(BankAccount.user))
+            .options(joinedload(Transaction.to_account).joinedload(BankAccount.user))
+            .options(joinedload(Transaction.user))
+            .order_by(Transaction.created_at.desc())
+            .limit(500)
+    ).all()
+    return _render(
+        request,
+        "admin/transactions.html",
+        active_page="admin",
+        admin_page="transactions",
+        rows=rows,
+        types=TRANSACTION_TYPES,
+        db=db,
+    )
 
 @app.post("/admin/subscribers/{subscriber_id}/toggle", response_class=HTMLResponse)
 async def admin_subscriber_toggle(

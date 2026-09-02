@@ -38,6 +38,9 @@ class User(TimestampMixin, Base):
     applications: Mapped[list["LoanApplication"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    accounts: Mapped[list["BankAccount"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class LoanApplication(TimestampMixin, Base):
@@ -76,3 +79,69 @@ class NewsletterSubscriber(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+ACCOUNT_TYPES = ["Checking", "Savings", "Business", "Fixed Deposit"]
+ACCOUNT_STATUSES = ["Active", "Frozen", "Closed"]
+
+TRANSACTION_TYPES = [
+    "Deposit",
+    "Withdrawal",
+    "Transfer",
+    "Payment",
+    "Fee",
+]
+
+
+class BankAccount(TimestampMixin, Base):
+    __tablename__ = "bank_accounts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    account_number: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    account_type: Mapped[str] = mapped_column(String(30), default="Checking")
+    currency: Mapped[str] = mapped_column(String(10), default="USD")
+    balance: Mapped[float] = mapped_column(default=0.0)
+    status: Mapped[str] = mapped_column(String(20), default="Active")
+
+    user: Mapped["User"] = relationship(back_populates="accounts")
+    outgoing: Mapped[list["Transaction"]] = relationship(
+        foreign_keys="Transaction.from_account_id",
+        back_populates="from_account",
+        cascade="all, delete-orphan",
+    )
+    incoming: Mapped[list["Transaction"]] = relationship(
+        foreign_keys="Transaction.to_account_id",
+        back_populates="to_account",
+        cascade="all, delete-orphan",
+    )
+
+
+class Transaction(TimestampMixin, Base):
+    __tablename__ = "transactions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    from_account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("bank_accounts.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    to_account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("bank_accounts.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    type: Mapped[str] = mapped_column(String(30))
+    amount: Mapped[float] = mapped_column(default=0.0)
+    fee: Mapped[float] = mapped_column(default=0.0)
+    currency: Mapped[str] = mapped_column(String(10), default="USD")
+    reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    user: Mapped["User | None"] = relationship()
+    from_account: Mapped["BankAccount | None"] = relationship(
+        foreign_keys=[from_account_id], back_populates="outgoing"
+    )
+    to_account: Mapped["BankAccount | None"] = relationship(
+        foreign_keys=[to_account_id], back_populates="incoming"
+    )

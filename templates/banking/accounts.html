@@ -1,0 +1,62 @@
+{% extends "banking/base.html" %}
+{% block title %}My Accounts — Western Prime Bank{% endblock %}
+{% block banking_body %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">My Accounts</h4>
+    {% if error %}<span class="text-danger">{{ error }}</span>{% endif %}
+    {% if success %}<span class="text-success">{{ success }}</span>{% endif %}
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-white"><h6 class="mb-0">Open a New Account</h6></div>
+    <div class="card-body">
+        <form method="post" action="/banking/accounts" class="row g-2">
+            <div class="col-md-4">
+                <select name="account_type" class="form-select">
+                    {% for t in account_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="currency" class="form-select">
+                    <option value="USD">USD — US Dollar</option>
+                    <option value="EUR">EUR — Euro</option>
+                    <option value="GBP">GBP — British Pound</option>
+                    <option value="NGN">NGN — Nigerian Naira</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input name="initial_deposit" type="number" step="0.01" min="0" placeholder="Initial deposit" class="form-control" value="{{ form_data.initial_deposit if form_data else '' }}">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Open</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead><tr><th>Account #</th><th>Type</th><th>Currency</th><th>Balance</th><th>Status</th><th>Opened</th><th></th></tr></thead>
+        <tbody>
+            {% for acc in all_accounts %}
+            <tr>
+                <td>#{{ acc.account_number }}</td>
+                <td>{{ acc.account_type }}</td>
+                <td>{{ acc.currency }}</td>
+                <td>${{ "{:,.2f}".format(acc.balance or 0.0) }}</td>
+                <td><span class="badge bg-{{ 'success' if acc.status == 'Active' else 'warning' }}">{{ acc.status }}</span></td>
+                <td class="small">{{ acc.created_at.strftime('%Y-%m-%d') }} if acc.created_at else '—' }}</td>
+                <td>
+                    <form method="post" action="/banking/switch" class="d-inline">
+                        <input type="hidden" name="account_id" value="{{ acc.id }}">
+                        <button class="btn btn-sm btn-outline-primary">Use</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-muted text-center">No accounts yet. Open one above.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

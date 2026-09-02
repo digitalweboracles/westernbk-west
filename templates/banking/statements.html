@@ -1,0 +1,52 @@
+{% extends "banking/base.html" %}
+{% block title %}Statements — Western Prime Bank{% endblock %}
+{% block banking_body %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Account Statement</h4>
+    <span class="text-muted">#{{ bank_account.account_number }} · {{ bank_account.account_type }} · {{ bank_account.currency }}</span>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="/banking/statements" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small">From</label>
+                <input type="date" name="start" class="form-control form-control-sm" value="{{ start }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">To</label>
+                <input type="date" name="end" class="form-control form-control-sm" value="{{ end }}">
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-sm btn-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Reference</th></tr></thead>
+        <tbody>
+            {% for t in rows %}
+            <tr>
+                <td class="small">{{ t.created_at.strftime('%Y-%m-%d %H:%M') }} if t.created_at else '—' }}</td>
+                <td>{{ t.type }}</td>
+                {% if t.from_account_id == bank_account.id %}
+                <td class="text-danger">${{ "{:,.2f}".format(t.amount) }}</td>
+                <td>—</td>
+                {% elif t.to_account_id == bank_account.id %}
+                <td>—</td>
+                <td class="text-success">${{ "{:,.2f}".format(t.amount) }}</td>
+                {% else %}
+                <td colspan="2">—</td>
+                {% endif %}
+                <td class="small">{{ t.reference or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-muted text-center">No transactions in this period.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

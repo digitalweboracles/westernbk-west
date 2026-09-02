@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Sign-In — Western Prime Bank Online Banking{% endblock %}
+{% block body %}
+<div style="min-height:100vh; display:flex; align-items:center; background:#f4f6f9;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-5">
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                    <div class="p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <a href="/">
+                                <img src="{{ url_for('static', path='account/logo.png?') }}" alt="Western Prime Bank" style="height:56px;" onerror="this.src='{{ url_for('static', path='images/logo.png') }}';">
+                            </a>
+                            <h4 class="mt-4 mb-1 fw-bold">Online Banking</h4>
+                            <p class="text-muted small mb-0">Access your accounts using your Account ID and password.</p>
+                        </div>
+                        {% if error %}<div class="alert alert-danger py-2 small">{{ error }}</div>{% endif %}
+                        {% if success %}<div class="alert alert-success py-2 small">{{ success }}</div>{% endif %}
+                        <form method="post" action="/account/auth">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold" for="id">Account ID</label>
+                                <input type="text" class="form-control form-control-lg" id="id" name="id" placeholder="Enter your Account ID" autocomplete="off" required>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label class="form-label small fw-semibold" for="pass">Password</label>
+                                    <a href="#" class="small text-primary text-decoration-none">Forgot Code?</a>
+                                </div>
+                                <div class="input-group">
+                                    <input type="password" class="form-control form-control-lg" id="pass" name="pass" placeholder="Enter your password" required>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="var p=document.getElementById('pass'); p.type=(p.type=='password'?'text':'password'); this.querySelector('i').className='fa '+((p.type=='password')?'fa-eye':'fa-eye-slash');"><i class="fa fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-lg btn-primary w-100 mt-3">Continue</button>
+                        </form>
+                        <div class="text-center mt-4">
+                            <a href="/account/index?action=enroll" class="btn btn-sm btn-danger text-white">Enroll for Online Banking</a>
+                        </div>
+                        <div class="text-center mt-4 small text-muted">
+                            New here? <a href="/signup" class="text-primary">Create an account</a> · <a href="/account/admin" class="text-primary">Admin Login</a>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center text-muted small mt-4">&copy; 2026 Western Prime Bank. All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

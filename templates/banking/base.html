@@ -1,0 +1,44 @@
+{% macro money(account, amount) %} {{ "{:,.2f}".format(amount or 0.0) }} {{ account.currency }} {% endmacro %}
+
+{% extends "base.html" %}
+{% block title %}{{ title or 'Online Banking' }} — Western Prime Bank{% endblock %}
+{% block body %}
+<section class="section-padding" style="padding-top:140px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-12">
+                <div class="card mb-30">
+                    <div class="card-body">
+                        <h5 class="mb-1">Online Banking</h5>
+                        <p class="text-muted small mb-3">Account {{ bank_account.account_number }}</p>
+                        {% if all_accounts %}
+                        <form method="post" action="/banking/switch" class="mb-3">
+                            <select name="account_id" class="form-select form-select-sm mb-2">
+                                {% for acc in all_accounts %}
+                                <option value="{{ acc.id }}" {{ 'selected' if acc.id == bank_account.id }}>#{{ acc.account_number }} ({{ acc.account_type }})</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-sm btn-outline-primary w-100">Switch Account</button>
+                        </form>
+                        {% endif %}
+                        <ul class="list-unstyled small">
+                            <li class="mb-2"><a href="/banking" class="{{ 'fw-bold text-primary' if active_sub == 'dashboard' else 'text-primary' }}">Dashboard</a></li>
+                            <li class="mb-2"><a href="/banking/accounts" class="{{ 'fw-bold text-primary' if active_sub == 'accounts' else 'text-primary' }}">My Accounts</a></li>
+                            <li class="mb-2"><a href="/banking/transfer" class="{{ 'fw-bold text-primary' if active_sub == 'transfer' else 'text-primary' }}">Transfer</a></li>
+                            <li class="mb-2"><a href="/banking/transactions" class="{{ 'fw-bold text-primary' if active_sub == 'transactions' else 'text-primary' }}">Transactions</a></li>
+                            <li class="mb-2"><a href="/banking/statements" class="{{ 'fw-bold text-primary' if active_sub == 'statements' else 'text-primary' }}">Statements</a></li>
+                            <li class="mb-2"><a href="/apply" class="text-primary">Loan Application</a></li>
+                        </ul>
+                        <hr>
+                        <a href="/dashboard" class="btn btn-sm btn-outline-primary">View Site</a>
+                        <a href="/banking/logout" class="btn btn-sm btn-outline-secondary">Logout</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-12">
+                {% block banking_body %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

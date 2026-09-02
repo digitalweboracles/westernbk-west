@@ -59,3 +59,15 @@ class LoanApplicationIn(BaseModel):
         if v not in LOAN_TYPES:
             raise HTTPException(status_code=422, detail=f"Invalid loan type. Choose from: {', '.join(LOAN_TYPES)}")
         return v
+
+
+class BankLoginIn(BaseModel):
+    account_number: str = Field(min_length=4, max_length=20)
+    password: str = Field(min_length=1)
+
+
+class TransferIn(BaseModel):
+    to_account_number: str = Field(min_length=4, max_length=20)
+    amount: float = Field(gt=0, le=1_000_000_000)
+    currency: str = Field(default="USD", min_length=3, max_length=10)
+    reference: str | None = Field(default=None, max_length=255)

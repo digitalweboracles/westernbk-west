@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block title %}Transactions — Admin — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">All Transactions</h4>
+    <a href="/admin/accounts" class="btn btn-sm btn-outline-primary">Back to Accounts</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Currency</th><th>Reference</th><th>User</th></tr></thead>
+        <tbody>
+            {% for t in rows %}
+            <tr>
+                <td>{{ t.id }}</td>
+                <td class="small">{{ t.created_at.strftime('%Y-%m-%d') }} if t.created_at else '—' }}</td>
+                <td><span class="badge bg-{{ 'success' if t.type in ('Deposit',) else 'danger' if t.type == 'Withdrawal' else 'info' }}">{{ t.type }}</span></td>
+                <td class="small">{{ t.from_account.account_number }} if t.from_account else '—' }}</td>
+                <td class="small">{{ t.to_account.account_number }} if t.to_account else '—' }}</td>
+                <td>${{ "{:,.2f}".format(t.amount or 0.0) }}</td>
+                <td>{{ t.currency }}</td>
+                <td class="small">{{ t.reference or '—' }}</td>
+                <td class="small">{{ t.user.full_name }} if t.user else '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="9" class="text-muted text-center">No transactions yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -11,6 +11,8 @@
                         <ul class="list-unstyled">
                             <li class="mb-2"><a href="/admin" class="{{ 'fw-bold ' if admin_page == 'dashboard' else '' }}text-primary">Dashboard</a></li>
                             <li class="mb-2"><a href="/admin/applications" class="{{ 'fw-bold ' if admin_page == 'applications' else '' }}text-primary">Applications</a></li>
+                            <li class="mb-2"><a href="/admin/accounts" class="{{ 'fw-bold ' if admin_page == 'accounts' else '' }}text-primary">Bank Accounts</a></li>
+                            <li class="mb-2"><a href="/admin/transactions" class="{{ 'fw-bold ' if admin_page == 'transactions' else '' }}text-primary">Transactions</a></li>
                             <li class="mb-2"><a href="/admin/users" class="{{ 'fw-bold ' if admin_page == 'users' else '' }}text-primary">Users</a></li>
                             <li class="mb-2"><a href="/admin/messages" class="{{ 'fw-bold ' if admin_page == 'messages' else '' }}text-primary">Messages {% if unread %}<span class="badge bg-danger">{{ unread }}</span>{% endif %}</a></li>
                             <li class="mb-2"><a href="/admin/subscribers" class="{{ 'fw-bold ' if admin_page == 'subscribers' else '' }}text-primary">Newsletter</a></li>
