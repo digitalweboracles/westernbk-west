@@ -1,12 +1,15 @@
 import os
 from pathlib import Path
 
+import logging
+
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
 from database import Base, SessionLocal, engine, get_db
@@ -81,7 +84,16 @@ def get_current_admin(request: Request, user: User = Depends(get_current_user)) 
 def _seed_admin():
     with SessionLocal() as db:
         email = os.environ.get("ADMIN_EMAIL", "admin@westernprimebank.com").lower().strip()
-        if db.scalar(select(User).where(User.email == email)) is None:
+        try:
+            exists = db.scalar(select(User).where(User.email == email))
+        except SQLAlchemyError:
+            # Older Postgres volumes predate is_admin/is_read; migrate the
+            # schema before touching the new columns.
+
+            db.rollback()
+            ensure_columns()
+            exists = db.scalar(select(User).where(User.email == email))
+        if exists is None:
             db.add(
                 User(
                     full_name="Bank Administrator",

@@ -1,6 +1,11 @@
+import logging
+
 from sqlalchemy import inspect, text
 
 from database import engine
+
+logger = logging.getLogger(__name__)
+
 
 def ensure_columns():
     inspector = inspect(engine);
@@ -20,8 +25,9 @@ def ensure_columns():
         try:
             with engine.begin() as conn:
                 conn.execute(text(sql));
-        except Exception:
-            pass
+            logger.warning("Applied migration: %s", sql)
+        except Exception as exc:
+            logger.warning("Migration failed (%s): %s", exc, sql)
 
 if __name__ == "__main__":
     ensure_columns();
