@@ -40,7 +40,8 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-
+    # Older volumes keep a schema that predates is_admin/is_read; ensure
+    # those columns exist before any model queries touched the tables.
 
 init_db()
 ensure_columns()
