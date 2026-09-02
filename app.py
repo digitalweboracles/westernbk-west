@@ -313,8 +313,10 @@ async def dashboard(
 async def apply_page(
     request: Request,
     loan_type: str | None = None,
-    user: User = Depends(get_current_user),
+    user: User | None = Depends(optional_current_user),
 ):
+    if user is None:
+        return RedirectResponse(url="/login", status_code=303)
     return _render(
         request, "apply.html", active_page="apply", loan_types=LOAN_TYPES,
         form_data={"loan_type": loan_type or ""},

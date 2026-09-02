@@ -45,7 +45,7 @@ def create_session_token(user: User) -> str:
 
 
 
-def optional_current_user(request: Request, db: Session) -> User | None:
+def optional_current_user(request: Request, db: Session = Depends(get_db)) -> User | None:
     token = request.cookies.get("session")
     if not token:
         return None
