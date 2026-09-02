@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}Newsletter Subscribers — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Newsletter Subscribers</h2>
+    <p>Users subscribed to the newsletter.</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Email</th>
+                <th>Subscribed</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in subscribers %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td>{{ s.email }}</td>
+                <td>{{ s.created_at.strftime('%Y-%m-%d') if s.created_at else '-' }}</td>
+                <td>
+                    {% if s.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-danger">Unsubscribed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form action="/admin/subscribers/{{ s.id }}/toggle" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm {% if s.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">{{ 'Unsubscribe' if s.is_active else 'Resubscribe' }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center">No subscribers yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

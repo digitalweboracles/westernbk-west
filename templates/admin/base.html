@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ title or 'Admin' }} — Western Prime Bank{% endblock %}
+{% block body %}
+<section class="section-padding" style="padding-top:140px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-12">
+                <div class="card mb-30">
+                    <div class="card-body">
+                        <h5 class="mb-3">Admin Panel</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="/admin" class="{{ 'fw-bold ' if admin_page == 'dashboard' else '' }}text-primary">Dashboard</a></li>
+                            <li class="mb-2"><a href="/admin/applications" class="{{ 'fw-bold ' if admin_page == 'applications' else '' }}text-primary">Applications</a></li>
+                            <li class="mb-2"><a href="/admin/users" class="{{ 'fw-bold ' if admin_page == 'users' else '' }}text-primary">Users</a></li>
+                            <li class="mb-2"><a href="/admin/messages" class="{{ 'fw-bold ' if admin_page == 'messages' else '' }}text-primary">Messages {% if unread %}<span class="badge bg-danger">{{ unread }}</span>{% endif %}</a></li>
+                            <li class="mb-2"><a href="/admin/subscribers" class="{{ 'fw-bold ' if admin_page == 'subscribers' else '' }}text-primary">Newsletter</a></li>
+                        </ul>
+                        <hr>
+                        <a href="/dashboard" class="btn btn-sm btn-outline-primary">View Site</a>
+                        <a href="/logout" class="btn btn-sm btn-outline-secondary">Logout</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-12">
+                {% block admin_body %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

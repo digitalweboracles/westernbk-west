@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block title %}Application #{{ application.id }} — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Application #{{ application.id }}</h2>
+    <a href="/admin/applications" class="btn btn-sm btn-outline-secondary">&larr; Back</a>
+</div>
+<div class="card mb-30">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 col-12">
+                <p><strong>Applicant:</strong> {{ application.user.full_name if application.user else '-' }}</p>
+                <p><strong>Email:</strong> {{ application.user.email if application.user else '-' }}</p>
+                <p><strong>Phone:</strong> {{ application.user.phone or '-' if application.user else '-' }}</p>
+            </div>
+            <div class="col-md-6 col-12">
+                <p><strong>Loan Type:</strong> {{ application.loan_type }}</p>
+                <p><strong>Amount:</strong> {{ application.currency }} {{ "{:,.2f}".format(application.amount) }}</p>
+                <p><strong>Term:</strong> {{ application.term_months or '-' }} months</p>
+            </div>
+        </div>
+        <p><strong>Purpose:</strong> {{ application.purpose or '-' }}</p>
+        <p><strong>Submitted:</strong> {{ application.created_at.strftime('%Y-%m-%d %H:%M') if application.created_at else '-' }}</p>
+        <p>
+            <strong>Status:</strong>
+            <span class="badge {% if application.status == 'Approved' %}bg-success{% elif application.status == 'Declined' %}bg-danger{% elif application.status == 'Under Review' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ application.status }}</span>
+        </p>
+        {% if application.admin_notes %}
+        <div class="alert alert-info"><strong>Admin Notes:</strong> {{ application.admin_notes }}</div>
+        {% endif %}
+    </div>
+</div>
+<h4 class="mb-3">Update Status</h4>
+<form action="/admin/applications/{{ application.id }}/status" method="post" class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 col-12">
+                <div class="single-form">
+                    <select name="status" class="form-select" required>
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {{ 'selected' if application.status == s }}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-8 col-12">
+                <div class="single-form">
+                    <input type="text" name="admin_notes" class="form-control" placeholder="Admin notes (optional)" value="{{ application.admin_notes or '' }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-one mt-20">Update Application</button>
+    </div>
+</form>
+{% endblock %}

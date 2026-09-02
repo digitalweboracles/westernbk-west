@@ -1,0 +1,93 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin Dashboard — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Admin Dashboard</h2>
+    <p>Overview of Western Prime Bank activity.</p>
+</div>
+<div class="row">
+    <div class="col-md-4 col-12 mb-30">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ total_users }}</h3>
+                <p class="mb-0">Users</p>
+                <a href="/admin/users" class="small">View all</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-12 mb-30">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ total_applications }}</h3>
+                <p class="mb-0">Loan Applications</p>
+                <a href="/admin/applications" class="small">View all</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-12 mb-30">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ pending_applications }}</h3>
+                <p class="mb-0">Pending Applications</p>
+                <a href="/admin/applications" class="small">Review</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-12 mb-30">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ total_messages }}</h3>
+                <p class="mb-0">Contact Messages</p>
+                <a href="/admin/messages" class="small">View all</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-12 mb-30">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ unread_messages }}</h3>
+                <p class="mb-0">Unread Messages</p>
+                <a href="/admin/messages" class="small">View</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-12 mb-30">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ total_subscribers }}</h3>
+                <p class="mb-0">Newsletter Subscribers</p>
+                <a href="/admin/subscribers" class="small">View all</a>
+            </div>
+        </div>
+    </div>
+</div>
+<h4 class="mb-3 mt-20">Recent Applications</h4>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Applicant</th>
+                <th>Loan Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in recent_applications %}
+            <tr>
+                <td>{{ app.id }}</td>
+                <td>{{ app.user.full_name if app.user else '-' }}</td>
+                <td>{{ app.loan_type }}</td>
+                <td>{{ "{:,.2f}".format(app.amount) }}</td>
+                <td><span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Declined' %}bg-danger{% elif app.status == 'Under Review' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ app.status }}</span></td>
+                <td>{{ app.created_at.strftime('%Y-%m-%d') if app.created_at else '-' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center">No applications yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -24,3 +24,12 @@ Routes: `/`, `/healthz`, `/about`, `/services`, `/projects`, `/contact`, `/newsl
 
 ## Local dev
 `pip install -r requirements.txt`; `DATABASE_URL=sqlite:///./dev.db SESSION_SECRET=test uvicorn app:app --port 8000`
+
+## Session notes (2026-09)
+- Admin area complete locally: routes `/admin`, `/admin/applications`, `/admin/applications/{id}`, `/admin/applications/{id}/status`, `/admin/users`, `/admin/users/{id}/toggle`, `/admin/messages`, `/admin/messages/{id}/read`, `/admin/subscribers`, `/admin/subscribers/{id}/toggle`; templates in `templates/admin/`.
+- `models.py` adds `User.is_admin` and `ContactMessage.is_read` (bool, default false). Prod runs SQLite ephemeral disk → fresh DB per deploy → `create_all` rebuilds schema incl these columns, so no ALTER migration needed yet. If Postgres volume persistence is enabled later, add lightweight ALTER-migration at startup before relying on old rows.
+
+- Login rejects inactive users (`POST /login` returns error page, no session); `get_current_user`/`optional_current_user` both check `is_active` (disabled → 401/None.
+- Added `GET /terms` and `GET /privacy` routes + `templates/terms.html`/`privacy.html`; footer/admin nav links updated; `index.html` links/forms/typos cleaned (incl social links now real URLs).
+- Known quirk: local plain-HTTP curl does not persist `Secure` cookie deletion → logout appears no-op over HTTP; over HTTPS (prod) `Set-Cookie: session=; Max-Age=0` works — verify with browser.
+- Railway env not yet wired: `DATABASE_URL` should be a Service Reference to the Postgres service; `SESSION_SECRET`/`ADMIN_PASSWORD` settable via service variables.`

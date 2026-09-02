@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% block title %}Contact Messages — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Contact Messages</h2>
+    <p>Messages submitted through the contact form.</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Subject</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Received</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in messages %}
+            <tr>
+                <td>{{ m.id }}</td>
+                <td>{{ m.name }}</td>
+                <td>{{ m.email }}{% if m.reply_to %} (reply-to: {{ m.reply_to }}){% endif %}</td>
+                <td>{{ m.subject or '-' }}</td>
+                <td>{{ m.message[:80] }}{{ '...' if m.message|length > 80 }}</td>
+                <td>
+                    {% if m.is_read %}
+                    <span class="badge bg-success">Read</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">New</span>
+                    {% endif %}
+                </td>
+                <td>{{ m.created_at.strftime('%Y-%m-%d') if m.created_at else '-' }}</td>
+                <td>
+                    {% if not m.is_read %}
+                    <form action="/admin/messages/{{ m.id }}/read" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Mark Read</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center">No messages yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

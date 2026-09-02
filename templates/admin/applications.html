@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% block title %}Loan Applications — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Loan Applications</h2>
+    <p>Review and manage all loan applications.</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Applicant</th>
+                <th>Email</th>
+                <th>Loan Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.id }}</td>
+                <td>{{ app.user.full_name if app.user else '-' }}</td>
+                <td>{{ app.user.email if app.user else '-' }}</td>
+                <td>{{ app.loan_type }}</td>
+                <td>{{ app.currency }} {{ "{:,.2f}".format(app.amount) }}</td>
+                <td><span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Declined' %}bg-danger{% elif app.status == 'Under Review' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ app.status }}</span></td>
+                <td>{{ app.created_at.strftime('%Y-%m-%d') if app.created_at else '-' }}</td>
+                <td><a href="/admin/applications/{{ app.id }}" class="btn btn-sm btn-outline-primary">Manage</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center">No applications yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% block title %}Users — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Users</h2>
+    <p>All registered user accounts.</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Active</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.id }}</td>
+                <td>{{ u.full_name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.phone or '-' }}</td>
+                <td>{{ 'Admin' if u.is_admin else 'User' }}</td>
+                <td>
+                    {% if u.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-danger">Disabled</span>
+                    {% endif %}
+                </td>
+                <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '-' }}</td>
+                <td>
+                    {% if u.id != current_user.id %}
+                    <form action="/admin/users/{{ u.id }}/toggle" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">{{ 'Disable' if u.is_active else 'Enable' }}</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">You</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center">No users yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
