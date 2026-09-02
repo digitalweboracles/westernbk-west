@@ -126,12 +126,17 @@ async def about(request: Request):
 
 @app.get("/services", response_class=HTMLResponse)
 async def services(request: Request):
-    return _render(request, "services.html", active_page="services", services=SERVICES)
+    return _render(request, "service-details.html", active_page="services")
+
+
+@app.get("/blog", response_class=HTMLResponse)
+async def blog(request: Request):
+    return _render(request, "blog.html", active_page="blog")
 
 
 @app.get("/projects", response_class=HTMLResponse)
 async def projects(request: Request):
-    return _render(request, "projects.html", active_page="projects", projects=PROJECTS)
+    return _render(request, "projects.html", active_page="projects")
 
 
 @app.get("/contact", response_class=HTMLResponse)
