@@ -45,7 +45,7 @@
                 <td>{{ acc.currency }}</td>
                 <td>${{ "{:,.2f}".format(acc.balance or 0.0) }}</td>
                 <td><span class="badge bg-{{ 'success' if acc.status == 'Active' else 'warning' }}">{{ acc.status }}</span></td>
-                <td class="small">{{ acc.created_at.strftime('%Y-%m-%d') }} if acc.created_at else '—' }}</td>
+                <td class="small">{{ acc.created_at.strftime('%Y-%m-%d') if acc.created_at else '—' }}</td>
                 <td>
                     <form method="post" action="/banking/switch" class="d-inline">
                         <input type="hidden" name="account_id" value="{{ acc.id }}">
