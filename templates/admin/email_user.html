@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% block title %}Email User — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Email User</h2>
+    <p>Compose a message that will be delivered to a customer.</p>
+</div>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="/admin/email-user">
+            <div class="mb-3">
+                <label class="form-label">Recipient</label>
+                <div class="d-flex gap-2">
+                    <input list="emails" class="form-control" name="email" id="email" placeholder="Enter or pick an email">
+                    <datalist id="emails">{% for u in users %}<option value="{{ u.email }}">{% endfor %}</datalist>
+                </div>
+            </div>
+            <div class="mb-3"><label class="form-label">Subject</label><input class="form-control" name="subject"></div>
+            <div class="mb-3"><label class="form-label">Message</label><textarea class="form-control" rows="6" name="message" required></textarea></div>
+            <button class="btn btn-primary">Send Message</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% block title %}Loan Settings — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Loan Settings</h2>
+    <p>Configure the loan types and statuses displayed across the bank.</p>
+</div>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card"><div class="card-body">
+            <h5 class="mb-3">Loan Types</h5>
+            <ul class="list-unstyled mb-0">{% for t in loan_types %}<li class="mb-2">• {{ t }}</li>{% endfor %}</ul>
+        </div></div>
+    </div>
+    <div class="col-md-6">
+        <div class="card"><div class="card-body">
+            <h5 class="mb-3">Loan Statuses</h5>
+            <ul class="list-unstyled mb-0">{% for s in statuses %}<li class="mb-2">
+                <span class="badge {% if s == 'Approved' %}bg-success{% elif s == 'Declined' %}bg-danger{% elif s == 'Under Review' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ s }}</span>
+            </li>{% endfor %}</ul>
+        </div></div>
+    </div>
+</div>
+<p class="text-muted mt-3 mb-0">Loan types/statuses are defined in <code>models.py</code> — editing them here is read-only inthis deployment.</p>
+{% endblock %}

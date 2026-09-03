@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin Login Activities — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Admin Login Activities</h2>
+    <p>Recent attempts to sign in to the administration console.</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead><tr><th>#</th><th>Admin</th><th>IP Address</th><th>User Agent</th><th>Status</th><th>Time</th></tr></thead>
+        <tbody>
+            {% for r in rows %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.admin_email }}</td>
+                <td>{{ r.ip_address or '—' }}</td>
+                <td class="small">{{ r.user_agent or '—' }}</td>
+                <td><span class="badge {% if r.status == 'Success' %}bg-success{% else %}bg-warning text-dark{% endif %}">{{ r.status }}</span></td>
+                <td class="small">{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center">No login activity recorded yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

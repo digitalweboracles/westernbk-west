@@ -8,7 +8,7 @@
 
 <div class="table-responsive">
     <table class="table table-striped table-hover align-middle">
-        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Currency</th><th>Reference</th><th>User</th></tr></thead>
+        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Currency</th><th>Reference</th><th>User</th><th></th></tr></thead>
         <tbody>
             {% for t in rows %}
             <tr>
@@ -21,9 +21,14 @@
                 <td>{{ t.currency }}</td>
                 <td class="small">{{ t.reference or '—' }}</td>
                 <td class="small">{{ t.user.full_name if t.user else '—' }}</td>
+                <td>
+                    <form method="post" action="/admin/transactions/{{ t.id }}/delete" onsubmit="return confirm('Delete this transaction?');">
+                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
             </tr>
             {% else %}
-            <tr><td colspan="9" class="text-muted text-center">No transactions yet.</td></tr>
+            <tr><td colspan="10" class="text-muted text-center">No transactions yet.</td></tr>
             {% endfor %}
         </tbody>
     </table>

@@ -88,6 +88,11 @@ aria-expanded="false" aria-label="Toggle navigation">
         <li class="nav-item">
         <a href="/contact" aria-label="Toggle navigation">Contact</a>
                                     </li>
+        {% if current_user and current_user.is_admin %}
+        <li class="nav-item">
+        <a href="/admin" aria-label="Toggle navigation">Admin</a>
+                                    </li>
+        {% endif %}
                                 </ul>
         </div> <!-- navbar collapse -->
         <div class="button add-list-button">

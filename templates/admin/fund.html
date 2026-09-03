@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% block title %}Fund User — Western Prime Bank{% endblock %}
+{% block admin_body %}
+<div class="section-title text-start mb-30">
+    <h2>Fund User</h2>
+    <p>Credit a customer's account balance directly from here.</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead><tr><th>Account</th><th>Customer</th><th>Type</th><th>Currency</th><th>Balance</th><th>Status</th><th>Fund</th></tr></thead>
+        <tbody>
+            {% for a in accounts %}
+            <tr>
+                <td>#{{ a.account_number }}</td>
+                <td>{{ a.user.full_name if a.user else '—' }}</td>
+                <td>{{ a.account_type }}</td>
+                <td>{{ a.currency }}</td>
+                <td>${{ "{:,.2f}".format(a.balance or 0.0) }}</td>
+                <td><span class="badge {% if a.status == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">{{ a.status }}</span></td>
+                <td>
+                    <form method="post" action="/admin/accounts/{{ a.id }}/credit" class="d-flex gap-2">
+                        <input class="form-control form-control-sm" style="width:110px" type="number" step="0.01" min="0.01" name="amount" placeholder="Amount" required>
+                        <input class="form-control form-control-sm" style="width:150px" name="reference" placeholder="Reference">
+                        <button class="btn btn-sm btn-primary">Fund</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center">No accounts yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -23,6 +23,7 @@ from models import (
     LOAN_STATUSES,
     LOAN_TYPES,
     TRANSACTION_TYPES,
+    AdminLoginActivity,
     BankAccount,
     ContactMessage,
     LoanApplication,
@@ -95,6 +96,18 @@ def get_current_admin(request: Request, user: User = Depends(get_current_user)) 
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
+
+
+def _record_admin_login(db: Session, email: str, request: Request, status: str = "Success"):
+    db.add(
+        AdminLoginActivity(
+            admin_email=email,
+            ip_address=request.client.host if request.client else None,
+            user_agent=(request.headers.get("user-agent") or None)[:254],
+            status=status,
+        )
+    )
+    db.commit()
 
 
 def _gen_account_number(db: Session) -> str:
@@ -438,7 +451,8 @@ async def account_admin_login(
             active_page="account",
             error="You do not have administrator access.",
         )
-    response = RedirectResponse(url="/admin", status_code=303)
+    _record_admin_login(db, email=email, request=request)
+    response = RedirectResponse(url="/admin/applications", status_code=303)
     response.set_cookie(
         "session",
         create_session_token(user),
@@ -447,6 +461,16 @@ async def account_admin_login(
         secure=os.environ.get("COOKIE_SECURE", "1") == "1",
     )
     return response
+
+
+@app.post("/account/admin/", response_class=HTMLResponse)
+async def account_admin_login_slash(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    return await account_admin_login(request, email=email, password=password, db=db)
 
 
 
@@ -527,6 +551,8 @@ async def login(
 ):
     user = db.scalar(select(User).where(User.email == email.strip().lower()))
     if user is None or not verify_password(password, user.password_hash):
+        if user:
+            _record_admin_login(db, email=user.email, request=request, status="Failed — invalid password")
         return _render(
             request, "login.html", active_page="login", error="Invalid email or password."
         )
@@ -537,7 +563,11 @@ async def login(
             active_page="login",
             error="Your account has been disabled. Please contact support.",
         )
-    response = RedirectResponse(url="/dashboard", status_code=303)
+    if user.is_admin:
+        _record_admin_login(db, email=user.email, request=request)
+    response = RedirectResponse(
+        url="/admin/applications" if user.is_admin else "/dashboard", status_code=303
+    )
     response.set_cookie(
         "session",
         create_session_token(user),
@@ -1032,8 +1062,28 @@ async def admin_application_status(
     application = db.get(LoanApplication, application_id)
     if application is None:
         raise HTTPException(status_code=404, detail="Application not found")
+    was_approved = application.status != "Approved" and status == "Approved"
     application.status = status
     application.admin_notes = admin_notes.strip() or None
+    if was_approved and application.user is not None:
+        # cPanel parity: approved loan amount is credited into the
+        # applicant's linked active bank account.
+
+        account = db.scalar(
+            select(BankAccount)
+                .where(BankAccount.user_id == application.user_id)
+                .where(BankAccount.status == "Active")
+                .order_by(BankAccount.created_at.desc())
+        )
+        if account is not None and application.amount > 0:
+            _credit(
+                db,
+                account,
+                application.amount,
+                application.currency or "USD",
+                "Deposit",
+                reference=f"Loan approved ({application.loan_type}) — {admin_notes.strip() or 'Admin approval'}".strip(),
+            )
     db.commit()
     return RedirectResponse(url="/admin/applications", status_code=303)
 
@@ -1234,6 +1284,236 @@ async def admin_transactions(
         types=TRANSACTION_TYPES,
         db=db,
     )
+
+@app.get("/admin/open-account", response_class=HTMLResponse)
+async def admin_open_account_page(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return _render(
+        request,
+        "admin/open_account.html",
+        active_page="admin",
+        admin_page="open_account",
+        account_types=ACCOUNT_TYPES,
+        db=db,
+    )
+
+
+@app.post("/admin/open-account", response_class=HTMLResponse)
+async def admin_open_account(
+    request: Request,
+    firstname: str = Form(...),
+    lastname: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(""),
+    address: str = Form(""),
+    city: str = Form(""),
+    country: str = Form(""),
+    dob: str = Form(""),
+    account_type: str = Form("Checking"),
+    currency: str = Form("USD"),
+    initial_balance: float = Form(0.0),
+    password: str = Form(""),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    email_norm = email.strip().lower()
+    if not email_norm or not firstname.strip() or not lastname.strip():
+        return _render(
+            request,
+            "admin/open_account.html",
+            active_page="admin",
+            admin_page="open_account",
+            account_types=ACCOUNT_TYPES,
+            db=db,
+            error="All required fields are required.",
+        )
+    if db.scalar(select(User).where(User.email == email_norm)) is not None:
+        return _render(
+            request,
+            "admin/open_account.html",
+            active_page="admin",
+            admin_page="open_account",
+            account_types=ACCOUNT_TYPES,
+            db=db,
+            error="A user with this email already exists.",
+        )
+    full_name = " ".join([firstname.strip(), lastname.strip()]).strip()
+    user_pass = password or secrets.token_urlsafe(10)
+    user = User(
+        full_name=full_name,
+        email=email_norm,
+        phone=phone.strip(),
+        password_hash=hash_password(user_pass),
+    )
+    db.add(user)
+    db.flush()
+    account = BankAccount(
+        user_id=user.id,
+        account_number=_gen_account_number(db),
+        account_type=account_type,
+        currency=currency.upper() or "USD",
+        balance=max(0.0, initial_balance),
+    )
+    db.add(account)
+    db.commit()
+    return _render(
+        request,
+        "admin/open_account.html",
+        active_page="admin",
+        admin_page="open_account",
+        account_types=ACCOUNT_TYPES,
+        db=db,
+        success=f"Account {account.account_number} opened for {full_name} ({email_norm}).",
+        username=email_norm,
+        generated_password=user_pass if not password else None,
+    )
+
+
+@app.get("/admin/fund", response_class=HTMLResponse)
+async def admin_fund_page(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    accounts = db.scalars(
+        select(BankAccount)
+            .options(joinedload(BankAccount.user))
+            .order_by(BankAccount.created_at.desc())
+    ).all()
+    return _render(
+        request,
+        "admin/fund.html",
+        active_page="admin",
+        admin_page="fund",
+        accounts=accounts,
+        db=db,
+    )
+
+
+@app.get("/admin/email-user", response_class=HTMLResponse)
+async def admin_email_user_page(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    users = db.scalars(select(User).order_by(User.full_name)).all()
+    return _render(
+        request,
+        "admin/email_user.html",
+        active_page="admin",
+        admin_page="email_user",
+        users=users,
+        db=db,
+    )
+
+
+@app.post("/admin/email-user", response_class=HTMLResponse)
+async def admin_email_user_send(
+    request: Request,
+    email: str = Form(...),
+    subject: str = Form(""),
+    message: str = Form(""),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    if not email.strip() or not message.strip():
+        return _render(
+            request,
+            "admin/email_user.html",
+            active_page="admin",
+            admin_page="email_user",
+            users=db.scalars(select(User).order_by(User.full_name)).all(),
+            db=db,
+            error="Email and message are required.",
+        )
+    # Record an outbox-style ContactMessage (no SMTP in this demo; mirrors cPanel email_user)
+    db.add(
+        ContactMessage(
+            name="Admin",
+            email=email.strip(),
+            subject=subject.strip() or "Message from Western Prime Bank",
+            message=message.strip(),
+            reply_to=admin.email,
+        )
+    )
+    db.commit()
+    return _render(
+        request,
+        "admin/email_user.html",
+        active_page="admin",
+        admin_page="email_user",
+        users=db.scalars(select(User).order_by(User.full_name)).all(),
+        db=db,
+        success=f"Message queued for {email.strip()}.",
+    )
+
+
+@app.get("/admin/login-activities", response_class=HTMLResponse)
+async def admin_login_activities(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    rows = db.scalars(
+        select(AdminLoginActivity).order_by(AdminLoginActivity.created_at.desc()).limit(200)
+    ).all()
+    return _render(
+        request,
+        "admin/login_activities.html",
+        active_page="admin",
+        admin_page="login_activities",
+        rows=rows,
+        db=db,
+    )
+
+
+@app.get("/admin/loan-settings", response_class=HTMLResponse)
+async def admin_loan_settings(
+    request: Request,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return _render(
+        request,
+        "admin/loan_settings.html",
+        active_page="admin",
+        admin_page="loan_settings",
+        loan_types=LOAN_TYPES,
+        statuses=LOAN_STATUSES,
+        db=db,
+    )
+
+
+@app.post("/admin/applications/{application_id}/delete", response_class=HTMLResponse)
+async def admin_application_delete(
+    application_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    app_ = db.get(LoanApplication, application_id)
+    if app_ is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    db.delete(app_)
+    db.commit()
+    return RedirectResponse(url="/admin/applications", status_code=303)
+
+
+@app.post("/admin/transactions/{transaction_id}/delete", response_class=HTMLResponse)
+async def admin_transaction_delete(
+    transaction_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    trx = db.get(Transaction, transaction_id)
+    if trx is None:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    db.delete(trx)
+    db.commit()
+    return RedirectResponse(url="/admin/transactions", status_code=303)
+
 
 @app.post("/admin/subscribers/{subscriber_id}/toggle", response_class=HTMLResponse)
 async def admin_subscriber_toggle(

@@ -73,6 +73,16 @@ class ContactMessage(TimestampMixin, Base):
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
+class AdminLoginActivity(TimestampMixin, Base):
+    __tablename__ = "admin_login_activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    admin_email: Mapped[str] = mapped_column(String(255))
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="Success")
+
+
 class NewsletterSubscriber(TimestampMixin, Base):
     __tablename__ = "newsletter_subscribers"
 
