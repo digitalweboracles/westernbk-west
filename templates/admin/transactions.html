@@ -13,14 +13,14 @@
             {% for t in rows %}
             <tr>
                 <td>{{ t.id }}</td>
-                <td class="small">{{ t.created_at.strftime('%Y-%m-%d') }} if t.created_at else '—' }}</td>
+                <td class="small">{{ t.created_at.strftime('%Y-%m-%d') if t.created_at else '—' }}</td>
                 <td><span class="badge bg-{{ 'success' if t.type in ('Deposit',) else 'danger' if t.type == 'Withdrawal' else 'info' }}">{{ t.type }}</span></td>
-                <td class="small">{{ t.from_account.account_number }} if t.from_account else '—' }}</td>
-                <td class="small">{{ t.to_account.account_number }} if t.to_account else '—' }}</td>
+                <td class="small">{{ t.from_account.account_number if t.from_account else '—' }}</td>
+                <td class="small">{{ t.to_account.account_number if t.to_account else '—' }}</td>
                 <td>${{ "{:,.2f}".format(t.amount or 0.0) }}</td>
                 <td>{{ t.currency }}</td>
                 <td class="small">{{ t.reference or '—' }}</td>
-                <td class="small">{{ t.user.full_name }} if t.user else '—' }}</td>
+                <td class="small">{{ t.user.full_name if t.user else '—' }}</td>
             </tr>
             {% else %}
             <tr><td colspan="9" class="text-muted text-center">No transactions yet.</td></tr>
