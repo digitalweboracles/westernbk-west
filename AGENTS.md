@@ -12,11 +12,11 @@ Static marketing site (original HTML/design) with FastAPI backend powering dynam
 
 ## DB backend
 - `database.py` reads `DATABASE_URL` (Postgres-ready), falls back to `sqlite:///./dev.db` for dev
-- Postgres service is deployed and Online but as of the last check the web service runs SQLite (`dev.db` inside ephemeral container disk) — `DATABASE_URL` **not yet** wired in the web service variables. User must add a Service Reference variable `DATABASE_URL` from the Postgres service (dashboard → service Variables) and redeploy to go fully Postgres.
+- Postgres was deleted/recreated by user on 2026-09-03; **current** URL uses `.railway.internal` host + fresh creds (password changes each recreation; get from Railway → Postgres → Variables → `DATABASE_URL`).
 
 ## Required service variables (Railway dashboard → service Variables)
 Set these on the `westernbk-west` service (web service)::
-- `DATABASE_URL` — **Service Reference** to the Postgres service (id `75c38127-2f9c-45f3-b6d6-424e8c2e6ea8`) not a literal string; redeploy after adding to go fully Postgres
+- `DATABASE_URL` — **literal string**, e.g. `postgresql://postgres:...@postgres.railway.internal:5432/railway` (NOT a Service Reference; see DB backend note)
 - `SESSION_SECRET` — stable random hex (e.g. `openssl rand -hex 32`); without it `security.py` auto-generates a new secret per deploy → all existing login cookies invalidate on every redeploy
 - `ADMIN_PASSWORD` — seeded admin password (`_seed_admin` uses it); if unset, default `AdminPass123!` applies only to fresh DB (existing user row keeps old hash)
 - `ADMIN_EMAIL` — optional; default `admin@westernprimebank.com`
