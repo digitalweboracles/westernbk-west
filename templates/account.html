@@ -15,16 +15,16 @@
     <meta name="twitter:image:alt" content="">
     <title>Leggo - </title>
     <meta name="description" content="This Credit Union is federally insured by the National Credit Union Administration. We do business in accordance with the Fair Housing Law and Equal opportunity Credit Act.">
-    <link rel="shortcut icon" href="{{ url_for('static', path='account/images/favicon.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="/static/account/images/favicon.png" type="image/x-icon">
     <!-- Fav Icon  -->
-    <link rel="shortcut icon" href="{{ url_for('static', path='account/images/favicon.png') }}">
+    <link rel="shortcut icon" href="/static/account/images/favicon.png">
     <!-- Page Title  -->
     <title>Welcome to  |  Leggo</title>
     <!-- StyleSheets  -->
-    <link rel="stylesheet" href="{{ url_for('static', path='account/assets/css/dashlite.css') }}?ver=2.4.0">
-    <link rel="stylesheet" href="{{ url_for('static', path='account/scss/sweetalert.css') }}">
-    <link id="skin-default" rel="stylesheet" href="{{ url_for('static', path='account/assets/css/theme.css') }}?ver=2.4.0">
-     <link href="{{ url_for('static', path='account/css/toastr.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/account/assets/css/dashlite.css?ver=2.4.0">
+    <link rel="stylesheet" href="/static/account/scss/sweetalert.css">
+    <link id="skin-default" rel="stylesheet" href="/static/account/assets/css/theme.css?ver=2.4.0">
+     <link href="/static/account/css/toastr.css" rel="stylesheet"/>
 </head>
 <script type="text/javascript">
 function googleTranslateElementInit() {
@@ -61,8 +61,8 @@ color:#000;
                 <div class="nk-block nk-block-middle nk-auth-body">
                     <div class="brand-logo pb-5">
                         <a href="" class="logo-link">
-                            <img class="logo-light logo-img logo-img-lg" src="{{ url_for('static', path='account/logo.png') }}" srcset="{{ url_for('static', path='account/logo.png') }}" alt="logo">
-                            <img class="logo-dark logo-img logo-img-lg" src="{{ url_for('static', path='account/logo.png') }}" srcset="{{ url_for('static', path='account/logo.png') }}" alt="logo-dark">
+                            <img class="logo-light logo-img logo-img-lg" src="/static/account/logo.png" srcset="/static/account/logo.png" alt="logo">
+                            <img class="logo-dark logo-img logo-img-lg" src="/static/account/logo.png" srcset="/static/account/logo.png" alt="logo-dark">
                         </a>
                     </div>
 
@@ -104,7 +104,7 @@ color:#000;
                         <div class="slider-item">
                             <div class="nk-feature nk-feature-center">
                                 <div class="nk-feature-img">
-                                    <img class="round" src="{{ url_for('static', path='account/images/security.svg') }}" srcset="{{ url_for('static', path='account/images/security.svg') }} 2x" alt="">
+                                    <img class="round" src="/static/account/images/security.svg" srcset="/static/account/images/security.svg 2x" alt="">
                                 </div>
                                 <div class="nk-feature-content py-4 p-sm-5">
                                     <h4>Protect your online banking.</h4>
@@ -115,7 +115,7 @@ color:#000;
                         <div class="slider-item">
                             <div class="nk-feature nk-feature-center">
                                 <div class="nk-feature-img">
-                                    <img class="round" src="{{ url_for('static', path='account/images/banking.svg') }}" srcset="{{ url_for('static', path='account/images/banking.svg') }} 2x" alt="">
+                                    <img class="round" src="/static/account/images/banking.svg" srcset="/static/account/images/banking.svg 2x" alt="">
                                 </div>
                                 <div class="nk-feature-content py-4 p-sm-5">
                                     <h4>Leggo</h4>
@@ -127,7 +127,7 @@ color:#000;
                         <div class="slider-item">
                             <div class="nk-feature nk-feature-center">
                                 <div class="nk-feature-img">
-                                    <img class="round" src="{{ url_for('static', path='account/images/onlinebanking.svg') }}" srcset="{{ url_for('static', path='account/images/onlinebanking.svg') }} 2x" alt="">
+                                    <img class="round" src="/static/account/images/onlinebanking.svg" srcset="/static/account/images/onlinebanking.svg 2x" alt="">
                                 </div>
                                 <div class="nk-feature-content py-4 p-sm-5">
                                     <h4>Leggo</h4>
@@ -143,13 +143,13 @@ color:#000;
         </div><!-- .nk-split -->
     </div><!-- app body @s -->
     <!-- JavaScript -->
-    <script src="{{ url_for('static', path='account/js/jquery.min.js') }}"></script>
+    <script src="/static/account/js/jquery.min.js"></script>
     <script type="text/javascript">
     $(document).ready(function (e) {
     {% if current_user %}
     if (document.getElementById("btn")) {
         document.getElementById("btn").value = "Redirecting to your dashboard...";
-        window.location.href = "{{ url_for('dashboard') }}";
+        window.location.href = "/dashboard";
     }
     {% else %}
     $("#verifyForm").on('submit',(function(e) {
@@ -167,7 +167,7 @@ color:#000;
             $("#verifyResult").html(data);
             document.getElementById("btn").disabled = false;
             if (data.indexOf("Verified!") !== -1) {
-                setTimeout(function(){ window.location.href = "{{ url_for('account_auth_page') }}"; }, 600);
+                setTimeout(function(){ window.location.href = "/account/auth"; }, 600);
             }
             },
             error: function()
@@ -180,10 +180,10 @@ color:#000;
 });
 </script>
 
-    <script src="{{ url_for('static', path='account/assets/js/bundle.js') }}?ver=2.4.0"></script>
-    <script src="{{ url_for('static', path='account/assets/js/scripts.js') }}?ver=2.4.0"></script>
-   <script src="{{ url_for('static', path='account/js/vendors/sweetalert.js') }}"></script>
-   <script src="{{ url_for('static', path='account/assets/js/custom.js') }}"></script>
-   <script src="{{ url_for('static', path='account/js/toastr.js') }}"></script>
+    <script src="/static/account/assets/js/bundle.js?ver=2.4.0"></script>
+    <script src="/static/account/assets/js/scripts.js?ver=2.4.0"></script>
+   <script src="/static/account/js/vendors/sweetalert.js"></script>
+   <script src="/static/account/assets/js/custom.js"></script>
+   <script src="/static/account/js/toastr.js"></script>
 </body>
 </html>
