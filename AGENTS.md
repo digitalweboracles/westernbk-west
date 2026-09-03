@@ -30,6 +30,9 @@ Set these on the `westernbk-west` service (web service)::
 Python FastAPI + SQLAlchemy + Jinja2; auth = JWT session cookie (`session`), PBKDF2 (`security.py`); env `SESSION_SECRET` optional (auto-generated)
 Routes: `/`, `/healthz`, `/about`, `/services`, `/projects`, `/blog`, `/contact`, `/newsletter`, `/signup`, `/login`, `/logout`, `/dashboard`, `/apply`
 
+## Asset URLs (2026-09)
+- **Never use `url_for('static', path=...)` in templates.** Behind Railway the app sees plain `http` (proxy `X-Forwarded-Proto` not trusted by default), so `url_for` emits absolute `http://<host>/static/...` links → browsers block every asset as mixed content on HTTPS → the page renders unstyled/"totally different". Use literal `/static/<path>` paths (host/scheme independent) everywhere — this is what the templates do now (commit `2e3bfca`)。 Same for JS redirects: hardcode `/dashboard`/`/account/auth` literals instead of `url_for('dashboard')`.
+
 ## Local dev
 `pip install -r requirements.txt`; `DATABASE_URL=sqlite:///./dev.db SESSION_SECRET=test uvicorn app:app --port 8000`
 
