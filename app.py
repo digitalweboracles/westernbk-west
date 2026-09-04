@@ -840,15 +840,21 @@ async def banking_transfer_submit(
     request: Request,
     to_account_number: str = Form(...),
     amount: float = Form(...),
-    currency: str = Form("USD"),
     reference: str = Form(""),
     account: BankAccount = Depends(get_current_bank_account),
     db: Session = Depends(get_db),
 ):
-    form_data = {"to_account_number": to_account_number, "amount": amount, "currency": currency, "reference": reference}
+    # A transfer always moves money in the sending account's own currency —
+    # the form has no currency picker, so the account (not client input) is
+    # authoritative. Previously this endpoint accepted a client-sent
+    # `currency` field defaulting to "USD"; since the form never actually
+    # sent one, every transfer out of a non-USD account was silently
+    # rejected with "Currency must match your account currency (<X>)."
+    # even when sender and recipient currencies matched.
+    form_data = {"to_account_number": to_account_number, "amount": amount, "reference": reference}
     try:
         data = TransferIn(
-            to_account_number=to_account_number, amount=amount, currency=currency, reference=reference or None,
+            to_account_number=to_account_number, amount=amount, currency=account.currency, reference=reference or None,
         )
     except ValidationError:
         return _render(
@@ -856,7 +862,7 @@ async def banking_transfer_submit(
             "banking/transfer.html",
             active_page="banking",
             bank_account=account,
-            error="Please enter a valid account number, amount greater than zero, and a valid currency code.",
+            error="Please enter a valid account number and an amount greater than zero.",
             form_data=form_data,
         )
     if data.to_account_number.strip() == account.account_number:
@@ -868,16 +874,7 @@ async def banking_transfer_submit(
             error="You cannot transfer to your own account.",
             form_data=form_data,
         )
-    currency_norm = data.currency.upper()
-    if currency_norm != account.currency:
-        return _render(
-            request,
-            "banking/transfer.html",
-            active_page="banking",
-            bank_account=account,
-            error="Currency must match your account currency (%s)." % account.currency,
-            form_data=form_data,
-        )
+    currency_norm = account.currency.upper()
     to_account = _account_from_number(db, data.to_account_number)
     if to_account is None:
         return _render(
