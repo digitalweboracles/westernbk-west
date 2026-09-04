@@ -1,6 +1,5 @@
 import re
 
-from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from models import LOAN_TYPES
@@ -56,8 +55,15 @@ class LoanApplicationIn(BaseModel):
     @field_validator("loan_type")
     @classmethod
     def check_loan_type(cls, v):
+        # Was: raise HTTPException(...) here. Pydantic validators must raise
+        # ValueError (Pydantic wraps it into a ValidationError) — raising
+        # HTTPException instead skipped Pydantic entirely, so
+        # apply_submit()'s `except (ValidationError, ValueError)` never
+        # caught it and the user got a raw {"detail": "..."} JSON 422
+        # response instead of the normal re-rendered form with an inline
+        # error message.
         if v not in LOAN_TYPES:
-            raise HTTPException(status_code=422, detail=f"Invalid loan type. Choose from: {', '.join(LOAN_TYPES)}")
+            raise ValueError(f"Invalid loan type. Choose from: {', '.join(LOAN_TYPES)}")
         return v
 
 

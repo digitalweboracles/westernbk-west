@@ -3268,3 +3268,27 @@ table tr td, th{
 		padding: 20px;
 	}
 }
+/* Admin login link: deliberately subdued/small so it reads as a separate,
+   lower-emphasis entry point from the customer Login/Sign Up buttons. */
+.admin-login-link {
+	font-size: 12px;
+	color: #6c757d;
+	text-decoration: underline;
+	white-space: nowrap;
+}
+.admin-login-link:hover {
+	color: #343a40;
+}
+
+/* max width 767px: stack header CTAs (Login/Sign Up/Admin Login/Logout)
+   full-width so they don't overflow or overlap the mobile menu toggle */
+@media only screen and (min-width: 320px) and (max-width: 767px){
+	.add-list-button {
+		width: 100%;
+		margin-top: 12px;
+		justify-content: flex-start !important;
+	}
+	.add-list-button .btn {
+		flex: 1 1 auto;
+	}
+}

@@ -88,6 +88,11 @@ aria-expanded="false" aria-label="Toggle navigation">
         <li class="nav-item">
         <a href="/contact" aria-label="Toggle navigation">Contact</a>
                                     </li>
+        {% if current_user %}
+        <li class="nav-item">
+        <a href="/dashboard" aria-label="Toggle navigation">My Account</a>
+                                    </li>
+        {% endif %}
         {% if current_user and current_user.is_admin %}
         <li class="nav-item">
         <a href="/admin" aria-label="Toggle navigation">Admin</a>
@@ -95,8 +100,14 @@ aria-expanded="false" aria-label="Toggle navigation">
         {% endif %}
                                 </ul>
         </div> <!-- navbar collapse -->
-        <div class="button add-list-button">
-        <a href="/account" class="btn">Signup </a>
+        <div class="button add-list-button d-flex align-items-center flex-wrap gap-2 justify-content-end">
+        {% if current_user %}
+        <a href="/logout" class="btn">Logout</a>
+        {% else %}
+        <a href="/account" class="btn">Customer Login</a>
+        <a href="/signup" class="btn" style="background:transparent;border:1px solid currentColor;">Sign Up</a>
+        <a href="/account/admin" class="admin-login-link" aria-label="Staff and administrator sign-in">Admin Login</a>
+        {% endif %}
                             </div>
                         </nav>
                         <!-- End Navbar -->
