@@ -14,7 +14,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <h6 class="text-muted mb-1">Available Balance</h6>
-                <h3 class="mb-1">${{ "{:,.2f}".format(bank_account.balance or 0.0) }}</h3>
+                <h3 class="mb-1">{{ money(bank_account, bank_account.balance) }}</h3>
                 <div class="small text-muted">{{ bank_account.account_type }} · #{{ bank_account.account_number }} · {{ bank_account.currency }}</div>
                 <span class="badge bg-success mt-2">{{ bank_account.status }}</span>
             </div>
@@ -51,7 +51,7 @@
                         {% for t in incoming %}
                         <tr>
                             <td>{{ t.reference or t.type }}</td>
-                            <td class="text-success">+${{ "{:,.2f}".format(t.amount) }}</td>
+                            <td class="text-success">+{{ money(t, t.amount) }}</td>
                             <td>{{ t.currency }}</td>
                             <td class="small">{{ t.created_at.strftime('%Y-%m-%d') if t.created_at else '—' }}</td>
                         </tr>
@@ -73,7 +73,7 @@
                         {% for t in outgoing %}
                         <tr>
                             <td>{{ t.reference or t.type }}</td>
-                            <td class="text-danger">-${{ "{:,.2f}".format(t.amount) }}</td>
+                            <td class="text-danger">-{{ money(t, t.amount) }}</td>
                             <td>{{ t.currency }}</td>
                             <td class="small">{{ t.created_at.strftime('%Y-%m-%d') if t.created_at else '—' }}</td>
                         </tr>

@@ -46,6 +46,7 @@ from security import (
     optional_current_user,
     verify_password,
 )
+from datetime import datetime, time
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -958,21 +959,35 @@ async def banking_statements(
     user: User = Depends(get_current_user),
     account: BankAccount = Depends(get_current_bank_account),
     db: Session = Depends(get_db),
+    start: str | None = None,
+    end: str | None = None,
 ):
-    rows = db.scalars(
-        select(Transaction)
-            .where(
-                (Transaction.from_account_id == account.id) | (Transaction.to_account_id == account.id)
-            )
-            .order_by(Transaction.created_at.desc())
-            .limit(500)
-    ).all()
+    query = select(Transaction).where(
+        (Transaction.from_account_id == account.id) | (Transaction.to_account_id == account.id)
+    )
+    if start:
+        try:
+            _start = datetime.combine(datetime.fromisoformat(start), time(0, 0, 0))
+        except (ValueError, TypeError):
+            _start = None
+        if _start is not None:
+            query = query.where(Transaction.created_at >= _start)
+    if end:
+        try:
+            _end = datetime.combine(datetime.fromisoformat(end), time(23, 59, 59))
+        except (ValueError, TypeError):
+            _end = None
+        if _end is not None:
+            query = query.where(Transaction.created_at <= _end)
+    rows = db.scalars(query.order_by(Transaction.created_at.desc()).limit(500)).all()
     return _render(
         request,
         "banking/statements.html",
         active_page="banking",
         bank_account=account,
         rows=rows,
+        start=start or "",
+        end=end or "",
     )
 
 

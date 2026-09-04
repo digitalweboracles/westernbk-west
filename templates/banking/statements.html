@@ -33,11 +33,11 @@
                 <td class="small">{{ t.created_at.strftime('%Y-%m-%d %H:%M') if t.created_at else '—' }}</td>
                 <td>{{ t.type }}</td>
                 {% if t.from_account_id == bank_account.id %}
-                <td class="text-danger">${{ "{:,.2f}".format(t.amount) }}</td>
+                <td class="text-danger">{{ money(t, t.amount) }}</td>
                 <td>—</td>
                 {% elif t.to_account_id == bank_account.id %}
                 <td>—</td>
-                <td class="text-success">${{ "{:,.2f}".format(t.amount) }}</td>
+                <td class="text-success">{{ money(t, t.amount) }}</td>
                 {% else %}
                 <td colspan="2">—</td>
                 {% endif %}

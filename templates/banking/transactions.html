@@ -16,15 +16,15 @@
                 <td><span class="badge bg-{{ 'success' if t.type in ('Deposit', 'Credit') else 'danger' if t.type == 'Withdrawal' else 'info' }}">{{ t.type }}</span></td>
                 <td>{{ t.reference or '—' }}</td>
                 {% if t.from_account_id == bank_account.id %}
-                <td class="text-danger">-${{ "{:,.2f}".format(t.amount) }}</td>
+                <td class="text-danger">-{{ money(t, t.amount) }}</td>
                 <td>—</td>
                 {% elif t.to_account_id == bank_account.id %}
                 <td>—</td>
-                <td class="text-success">+${{ "{:,.2f}".format(t.amount) }}</td>
+                <td class="text-success">+{{ money(t, t.amount) }}</td>
                 {% else %}
                 <td colspan="2" class="text-muted">—</td>
                 {% endif %}
-                <td class="small">{{ "{:,.2f}".format(bank_account.balance) }}</td>
+                <td class="small">{{ money(bank_account, bank_account.balance) }}</td>
             </tr>
             {% else %}
             <tr><td colspan="6" class="text-muted text-center">No transactions yet.</td></tr>

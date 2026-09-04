@@ -1,8 +1,14 @@
-{% macro money(account, amount) %} {{ "{:,.2f}".format(amount or 0.0) }} {{ account.currency }} {% endmacro %}
-
+{% macro money(account, amount) %} {{ "{:,.2f}".format(amount or  0.0) }}&nbsp;{{ account.currency }}{% endmacro %}
 {% extends "base.html" %}
 {% block title %}{{ title or 'Online Banking' }} — Western Prime Bank{% endblock %}
 {% block body %}
+{% set active_sub = active_sub if active_sub is defined else (
+    'dashboard' if request.url.path == '/banking' else
+    'accounts' if '/banking/accounts' in request.url.path else
+    'transfer' if '/banking/transfer' in request.url.path else
+    'transactions' if '/banking/transactions' in request.url.path else
+    'statements' if '/banking/statements' in request.url.path else ''
+) %}
 <section class="section-padding" style="padding-top:140px;">
     <div class="container">
         <div class="row">
