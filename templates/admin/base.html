@@ -1,30 +1,64 @@
 {% extends "base.html" %}
 {% block title %}{{ title or 'Admin' }} — Western Prime Bank{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/admin-theme.css" />
+{% endblock %}
 {% block body %}
-<section class="section-padding" style="padding-top:140px;">
+<section class="section-padding admin-shell" style="padding-top:140px;">
     <div class="container">
+        <div class="admin-topbar">
+            <div class="announce">
+                <i class="fa fa-bullhorn"></i>
+                <span>Western Prime Bank admin console — signed in as {{ current_user.full_name if current_user else 'Administrator' }}.</span>
+            </div>
+            <div class="dropdown">
+                <button class="admin-user-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="admin-avatar"><i class="fa fa-user"></i></span>
+                    <span class="admin-user-meta">
+                        <span class="name">{{ current_user.full_name if current_user else 'Administrator' }}</span>
+                        <span class="role">Bank Manager · Western Prime</span>
+                    </span>
+                    <i class="fa fa-chevron-down" style="font-size:11px;color:var(--admin-ink-muted);"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/admin"><i class="fa fa-tachometer me-2"></i>Dashboard</a></li>
+                    <li><a class="dropdown-item" href="/dashboard"><i class="fa fa-globe me-2"></i>View Site</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="/logout"><i class="fa fa-sign-out me-2"></i>Sign Out</a></li>
+                </ul>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-lg-3 col-md-4 col-12">
-                <div class="card mb-30">
+                <div class="card mb-30 admin-sidebar">
                     <div class="card-body">
-                        <h5 class="mb-3">Admin Panel</h5>
+                        <div class="admin-brand">
+                            <span class="mark"><i class="fa fa-university"></i></span>
+                            <span>
+                                <span class="label-main">Western Prime</span>
+                                <span class="label-sub">Bank Admin</span>
+                            </span>
+                        </div>
                         <ul class="list-unstyled">
-                            <li class="mb-2"><a href="/admin" class="{{ 'fw-bold ' if admin_page == 'dashboard' else '' }}text-primary">Dashboard</a></li>
-                            <li class="mb-2"><a href="/admin/applications" class="{{ 'fw-bold ' if admin_page == 'applications' else '' }}text-primary">Loan Requests</a></li>
-                            <li class="mb-2"><a href="/admin/accounts" class="{{ 'fw-bold ' if admin_page == 'accounts' else '' }}text-primary">Bank Accounts</a></li>
-                            <li class="mb-2"><a href="/admin/open-account" class="{{ 'fw-bold ' if admin_page == 'open_account' else '' }}text-primary">Open Account</a></li>
-                            <li class="mb-2"><a href="/admin/transactions" class="{{ 'fw-bold ' if admin_page == 'transactions' else '' }}text-primary">Transactions</a></li>
-                            <li class="mb-2"><a href="/admin/users" class="{{ 'fw-bold ' if admin_page == 'users' else '' }}text-primary">Users</a></li>
-                            <li class="mb-2"><a href="/admin/fund" class="{{ 'fw-bold ' if admin_page == 'fund' else '' }}text-primary">Fund User</a></li>
-                            <li class="mb-2"><a href="/admin/email-user" class="{{ 'fw-bold ' if admin_page == 'email_user' else '' }}text-primary">Email User</a></li>
-                            <li class="mb-2"><a href="/admin/login-activities" class="{{ 'fw-bold ' if admin_page == 'login_activities' else '' }}text-primary">Login Activities</a></li>
-                            <li class="mb-2"><a href="/admin/loan-settings" class="{{ 'fw-bold ' if admin_page == 'loan_settings' else '' }}text-primary">Loan Settings</a></li>
-                            <li class="mb-2"><a href="/admin/messages" class="{{ 'fw-bold ' if admin_page == 'messages' else '' }}text-primary">Messages {% if unread %}<span class="badge bg-danger">{{ unread }}</span>{% endif %}</a></li>
-                            <li class="mb-2"><a href="/admin/subscribers" class="{{ 'fw-bold ' if admin_page == 'subscribers' else '' }}text-primary">Newsletter</a></li>
+                            <li class="mb-2"><a href="/admin" class="{{ 'fw-bold ' if admin_page == 'dashboard' else '' }}text-primary"><i class="fa fa-tachometer"></i>Dashboard</a></li>
+                            <li class="mb-2"><a href="/admin/applications" class="{{ 'fw-bold ' if admin_page == 'applications' else '' }}text-primary"><i class="fa fa-file-text"></i>Loan Requests</a></li>
+                            <li class="mb-2"><a href="/admin/accounts" class="{{ 'fw-bold ' if admin_page == 'accounts' else '' }}text-primary"><i class="fa fa-credit-card"></i>Bank Accounts</a></li>
+                            <li class="mb-2"><a href="/admin/open-account" class="{{ 'fw-bold ' if admin_page == 'open_account' else '' }}text-primary"><i class="fa fa-user-plus"></i>Open Account</a></li>
+                            <li class="mb-2"><a href="/admin/transactions" class="{{ 'fw-bold ' if admin_page == 'transactions' else '' }}text-primary"><i class="fa fa-exchange"></i>Transactions</a></li>
+                            <li class="mb-2"><a href="/admin/users" class="{{ 'fw-bold ' if admin_page == 'users' else '' }}text-primary"><i class="fa fa-users"></i>Users</a></li>
+                            <li class="mb-2"><a href="/admin/fund" class="{{ 'fw-bold ' if admin_page == 'fund' else '' }}text-primary"><i class="fa fa-money"></i>Fund User</a></li>
+                            <li class="mb-2"><a href="/admin/email-user" class="{{ 'fw-bold ' if admin_page == 'email_user' else '' }}text-primary"><i class="fa fa-envelope"></i>Email User</a></li>
+                            <li class="mb-2"><a href="/admin/login-activities" class="{{ 'fw-bold ' if admin_page == 'login_activities' else '' }}text-primary"><i class="fa fa-history"></i>Login Activities</a></li>
+                            <li class="mb-2"><a href="/admin/loan-settings" class="{{ 'fw-bold ' if admin_page == 'loan_settings' else '' }}text-primary"><i class="fa fa-cog"></i>Loan Settings</a></li>
+                            <li class="mb-2"><a href="/admin/messages" class="{{ 'fw-bold ' if admin_page == 'messages' else '' }}text-primary"><i class="fa fa-comment"></i>Messages {% if unread %}<span class="badge bg-danger">{{ unread }}</span>{% endif %}</a></li>
+                            <li class="mb-2"><a href="/admin/subscribers" class="{{ 'fw-bold ' if admin_page == 'subscribers' else '' }}text-primary"><i class="fa fa-newspaper-o"></i>Newsletter</a></li>
                         </ul>
                         <hr>
-                        <a href="/dashboard" class="btn btn-sm btn-outline-primary">View Site</a>
-                        <a href="/logout" class="btn btn-sm btn-outline-secondary">Logout</a>
+                        <div class="sidebar-footer">
+                            <a href="/dashboard" class="btn btn-sm btn-outline-primary">View Site</a>
+                            <a href="/logout" class="btn btn-sm btn-outline-secondary">Logout</a>
+                        </div>
                     </div>
                 </div>
             </div>
