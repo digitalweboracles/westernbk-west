@@ -32,8 +32,8 @@
                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#credit-{{ acc.id }}">Credit</button>
                     <div class="collapse mt-2" id="credit-{{ acc.id }}">
                         <form method="post" action="/admin/accounts/{{ acc.id }}/credit" class="d-flex gap-2">
-                            <input type="number" name="amount" step="0.01" min="0.01" class="form-control form-control-sm" placeholder="Amount" required style="max-width:140px;>
-                            <input type="text" name="reference" class="form-control form-control-sm" placeholder="Ref (optional)" style="max-width:180px;>
+                            <input type="number" name="amount" step="0.01" min="0.01" class="form-control form-control-sm" placeholder="Amount" required style="max-width:140px;">
+                            <input type="text" name="reference" class="form-control form-control-sm" placeholder="Ref (optional)" style="max-width:180px;">
                             <button class="btn btn-sm btn-success">Add</button>
                         </form>
                     </div>

@@ -120,7 +120,15 @@ def _gen_account_number(db: Session) -> str:
 
 
 def _account_from_number(db: Session, number: str) -> BankAccount | None:
-    return db.scalar(select(BankAccount).where(BankAccount.account_number == number.strip()))
+    # Account numbers are displayed elsewhere in the UI with a leading "#"
+    # (My Accounts, Admin > Bank Accounts). If someone copies that display
+    # text straight into the transfer recipient field, the "#" comes along
+    # for the ride and the exact-match lookup below fails with a
+    # misleading "account not found" even though the account is real.
+    # Stripping a leading "#" (and surrounding whitespace) makes the
+    # lookup match what the user almost certainly meant.
+    cleaned = number.strip().lstrip("#").strip()
+    return db.scalar(select(BankAccount).where(BankAccount.account_number == cleaned))
 
 
 def _credit(db: Session, account: BankAccount, amount: float, currency: str, type_: str, reference: str | None = None):
