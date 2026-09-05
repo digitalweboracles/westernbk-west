@@ -1167,6 +1167,22 @@ async def admin_user_toggle(
     return RedirectResponse(url="/admin/users", status_code=303)
 
 
+@app.post("/admin/users/{user_id}/delete", response_class=HTMLResponse)
+async def admin_user_delete(
+    user_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+    db.delete(user)
+    db.commit()
+    return RedirectResponse(url="/admin/users?deleted=1", status_code=303)
+
+
 @app.get("/admin/messages", response_class=HTMLResponse)
 async def admin_messages(
     request: Request,

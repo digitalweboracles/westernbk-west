@@ -40,6 +40,9 @@
                     <form action="/admin/users/{{ u.id }}/toggle" method="post" class="d-inline">
                         <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">{{ 'Disable' if u.is_active else 'Enable' }}</button>
                     </form>
+                    <form action="/admin/users/{{ u.id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Permanently delete {{ u.full_name }} and all of their accounts and transactions? This cannot be undone.');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                     {% else %}
                     <span class="text-muted">You</span>
                     {% endif %}
