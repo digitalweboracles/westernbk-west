@@ -3,7 +3,7 @@
 {% block banking_body %}
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Account Statement</h4>
-    <span class="text-muted">#{{ bank_account.account_number }} · {{ bank_account.account_type }} · {{ bank_account.currency }}</span>
+    <span class="text-muted">{{ bank_account.account_number }} · {{ bank_account.account_type }} · {{ bank_account.currency }}</span>
 </div>
 
 <div class="card mb-4">

@@ -21,7 +21,7 @@
                         <form method="post" action="/banking/switch" class="mb-3">
                             <select name="account_id" class="form-select form-select-sm mb-2">
                                 {% for acc in all_accounts %}
-                                <option value="{{ acc.id }}" {{ 'selected' if acc.id == bank_account.id }}>#{{ acc.account_number }} ({{ acc.account_type }})</option>
+                                <option value="{{ acc.id }}" {{ 'selected' if acc.id == bank_account.id }}>{{ acc.account_number }} ({{ acc.account_type }})</option>
                                 {% endfor %}
                             </select>
                             <button class="btn btn-sm btn-outline-primary w-100">Switch Account</button>

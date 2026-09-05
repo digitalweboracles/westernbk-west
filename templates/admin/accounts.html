@@ -15,7 +15,7 @@
                 <td>{{ acc.id }}</td>
                 <td>{{ acc.user.full_name }}</td>
                 <td class="small">{{ acc.user.email }}</td>
-                <td>#{{ acc.account_number }}</td>
+                <td>{{ acc.account_number }}</td>
                 <td>{{ acc.account_type }}</td>
                 <td>{{ acc.currency }}</td>
                 <td>${{ "{:,.2f}".format(acc.balance or 0.0) }}</td>

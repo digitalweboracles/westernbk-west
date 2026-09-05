@@ -11,7 +11,7 @@
         <tbody>
             {% for a in accounts %}
             <tr>
-                <td>#{{ a.account_number }}</td>
+                <td>{{ a.account_number }}</td>
                 <td>{{ a.user.full_name if a.user else '—' }}</td>
                 <td>{{ a.account_type }}</td>
                 <td>{{ a.currency }}</td>

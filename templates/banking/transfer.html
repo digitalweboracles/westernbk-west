@@ -9,7 +9,7 @@
 {% if success %}<div class="alert alert-success">{{ success }} <a href="/banking/transactions">View transactions</a></div>{% endif %}
 
 <div class="card">
-    <div class="card-header bg-white"><h6 class="mb-0">From Account: #{{ bank_account.account_number }} — {{ "{:,.2f}".format(bank_account.balance or 0.0) }} {{ bank_account.currency }} available</h6></div>
+    <div class="card-header bg-white"><h6 class="mb-0">From Account: {{ bank_account.account_number }} — {{ "{:,.2f}".format(bank_account.balance or 0.0) }} {{ bank_account.currency }} available</h6></div>
     <div class="card-body">
         <form method="post" action="/banking/transfer" class="row g-3">
             <div class="col-md-6">

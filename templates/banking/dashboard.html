@@ -15,7 +15,7 @@
             <div class="card-body">
                 <h6 class="text-muted mb-1">Available Balance</h6>
                 <h3 class="mb-1">{{ money(bank_account, bank_account.balance) }}</h3>
-                <div class="small text-muted">{{ bank_account.account_type }} · #{{ bank_account.account_number }} · {{ bank_account.currency }}</div>
+                <div class="small text-muted">{{ bank_account.account_type }} · {{ bank_account.account_number }} · {{ bank_account.currency }}</div>
                 <span class="badge bg-success mt-2">{{ bank_account.status }}</span>
             </div>
         </div>

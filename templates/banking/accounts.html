@@ -40,7 +40,7 @@
         <tbody>
             {% for acc in all_accounts %}
             <tr>
-                <td>#{{ acc.account_number }}</td>
+                <td>{{ acc.account_number }}</td>
                 <td>{{ acc.account_type }}</td>
                 <td>{{ acc.currency }}</td>
                 <td>{{ money(acc, acc.balance) }}</td>
